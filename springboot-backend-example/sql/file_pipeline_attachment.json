@@ -1,0 +1,19 @@
+#文本抽取管道
+PUT /_ingest/pipeline/attachment
+{
+"description": "Extract file content",
+"processors": [
+{
+"attachment": {
+"field": "content",
+"target_field": "attachment",
+"indexed_chars": -1
+}
+},
+{
+"remove": {
+"field": "content"
+}
+}
+]
+}
