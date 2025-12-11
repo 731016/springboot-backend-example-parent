@@ -155,6 +155,7 @@ public class UserController {
      */
     @GetMapping("/current")
     public BaseResponse<LoginUserVO> getLoginUser(HttpServletRequest request) {
+        log.warn("current sessionId={}", request.getSession().getId());
         User user = userService.getLoginUser(request);
         return ResultUtils.success(userService.getLoginUserVO(user));
     }

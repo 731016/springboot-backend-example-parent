@@ -148,6 +148,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }
             // 记录用户的登录态
             request.getSession().setAttribute(USER_LOGIN_STATE, user);
+            log.warn("current sessionId={}", request.getSession().getId());
             return getLoginUserVO(user);
         }
     }
