@@ -9,12 +9,11 @@
         <groupId>com.xiaofei</groupId>
         <artifactId>springboot-backend-example-parent</artifactId>
         <version>1.0.0</version>
-        <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.yupi</groupId>
     <artifactId>springboot-backend-example</artifactId>
     <version>1.0.0</version>
-    <name>springboot-init</name>
+    <name>springboot-backend-example</name>
     <packaging>jar</packaging>
     <properties>
         <java.version>${java.version}</java.version>
@@ -173,6 +172,7 @@
     </dependencies>
 
     <build>
+        <finalName>springboot-backend-example</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

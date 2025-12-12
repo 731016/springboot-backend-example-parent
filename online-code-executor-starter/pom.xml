@@ -7,7 +7,6 @@
         <groupId>com.xiaofei</groupId>
         <artifactId>springboot-backend-example-parent</artifactId>
         <version>1.0.0</version>
-        <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.yuyuan</groupId>
     <artifactId>online-code-executor-starter</artifactId>
@@ -50,4 +49,22 @@
             <artifactId>hutool-all</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+<!--            没有主类，不需要打包成jar-->
+<!--            <plugin>-->
+<!--                <groupId>org.springframework.boot</groupId>-->
+<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
+<!--                <configuration>-->
+<!--                    <excludes>-->
+<!--                        <exclude>-->
+<!--                            <groupId>org.projectlombok</groupId>-->
+<!--                            <artifactId>lombok</artifactId>-->
+<!--                        </exclude>-->
+<!--                    </excludes>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+        </plugins>
+    </build>
 </project>
