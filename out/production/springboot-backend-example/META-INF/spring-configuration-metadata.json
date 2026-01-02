@@ -1,0 +1,88 @@
+{
+  "groups": [
+    {
+      "name": "cos.client",
+      "type": "com.xiaofei.springbootinit.config.CosClientConfig",
+      "sourceType": "com.xiaofei.springbootinit.config.CosClientConfig"
+    },
+    {
+      "name": "spring.datasource.lovefinder",
+      "type": "javax.sql.DataSource",
+      "sourceType": "com.xiaofei.springbootinit.config.datasource.DataSourceConfig",
+      "sourceMethod": "lovefinderDataSource()"
+    },
+    {
+      "name": "spring.datasource.master",
+      "type": "javax.sql.DataSource",
+      "sourceType": "com.xiaofei.springbootinit.config.datasource.DataSourceConfig",
+      "sourceMethod": "masterDataSource()"
+    },
+    {
+      "name": "spring.redis",
+      "type": "com.xiaofei.springbootinit.config.RedisProperties",
+      "sourceType": "com.xiaofei.springbootinit.config.RedisProperties"
+    },
+    {
+      "name": "wx.open",
+      "type": "com.xiaofei.springbootinit.config.WxOpenConfig",
+      "sourceType": "com.xiaofei.springbootinit.config.WxOpenConfig"
+    }
+  ],
+  "properties": [
+    {
+      "name": "cos.client.access-key",
+      "type": "java.lang.String",
+      "description": "accessKey",
+      "sourceType": "com.xiaofei.springbootinit.config.CosClientConfig"
+    },
+    {
+      "name": "cos.client.bucket",
+      "type": "java.lang.String",
+      "description": "桶名",
+      "sourceType": "com.xiaofei.springbootinit.config.CosClientConfig"
+    },
+    {
+      "name": "cos.client.region",
+      "type": "java.lang.String",
+      "description": "区域",
+      "sourceType": "com.xiaofei.springbootinit.config.CosClientConfig"
+    },
+    {
+      "name": "cos.client.secret-key",
+      "type": "java.lang.String",
+      "description": "secretKey",
+      "sourceType": "com.xiaofei.springbootinit.config.CosClientConfig"
+    },
+    {
+      "name": "spring.redis.host",
+      "type": "java.lang.String",
+      "sourceType": "com.xiaofei.springbootinit.config.RedisProperties"
+    },
+    {
+      "name": "spring.redis.port",
+      "type": "java.lang.Integer",
+      "sourceType": "com.xiaofei.springbootinit.config.RedisProperties"
+    },
+    {
+      "name": "spring.redis.timeout",
+      "type": "java.time.Duration",
+      "sourceType": "com.xiaofei.springbootinit.config.RedisProperties"
+    },
+    {
+      "name": "wx.open.app-id",
+      "type": "java.lang.String",
+      "sourceType": "com.xiaofei.springbootinit.config.WxOpenConfig"
+    },
+    {
+      "name": "wx.open.app-secret",
+      "type": "java.lang.String",
+      "sourceType": "com.xiaofei.springbootinit.config.WxOpenConfig"
+    },
+    {
+      "name": "wx.open.wx-mp-service",
+      "type": "me.chanjar.weixin.mp.api.WxMpService",
+      "sourceType": "com.xiaofei.springbootinit.config.WxOpenConfig"
+    }
+  ],
+  "hints": []
+}
