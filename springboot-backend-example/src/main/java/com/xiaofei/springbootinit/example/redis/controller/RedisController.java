@@ -1,12 +1,12 @@
 package com.xiaofei.springbootinit.example.redis.controller;
 
-import com.xiaofei.springbootinit.common.BaseResponse;
-import com.xiaofei.springbootinit.common.ErrorCode;
-import com.xiaofei.springbootinit.common.ResultUtils;
+import com.xiaofei.springbootbackendcommon.common.BaseResponse;
+import com.xiaofei.springbootbackendcommon.common.ErrorCode;
+import com.xiaofei.springbootbackendcommon.common.ResultUtils;
 import com.xiaofei.springbootinit.example.redis.model.dto.CodeDictionaryDto;
 import com.xiaofei.springbootinit.example.redis.model.entity.CodeDictionary;
 import com.xiaofei.springbootinit.example.redis.service.impl.CodeDictionaryServiceImpl;
-import com.xiaofei.springbootinit.exception.BusinessException;
+import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

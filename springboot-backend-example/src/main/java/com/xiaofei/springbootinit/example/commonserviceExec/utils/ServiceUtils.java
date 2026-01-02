@@ -1,15 +1,14 @@
 package com.xiaofei.springbootinit.example.commonserviceExec.utils;
 
-import com.xiaofei.springbootinit.common.BaseResponse;
-import com.xiaofei.springbootinit.common.ErrorCode;
-import com.xiaofei.springbootinit.common.ResultUtils;
+import com.xiaofei.springbootbackendcommon.common.BaseResponse;
+import com.xiaofei.springbootbackendcommon.common.ErrorCode;
+import com.xiaofei.springbootbackendcommon.common.ResultUtils;
 import com.xiaofei.springbootinit.example.commonserviceExec.model.dto.CommonServiceRequest;
 import com.xiaofei.springbootinit.example.commonserviceExec.model.entity.ServiceProcessorConfig;
 import com.xiaofei.springbootinit.example.commonserviceExec.service.ProcessorConfigService;
 import com.xiaofei.springbootinit.example.commonserviceExec.service.ServiceProcessor;
-import com.xiaofei.springbootinit.exception.BusinessException;
+import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -18,7 +17,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Resource;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;

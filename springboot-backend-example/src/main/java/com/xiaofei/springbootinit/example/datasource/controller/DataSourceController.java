@@ -1,8 +1,8 @@
 package com.xiaofei.springbootinit.example.datasource.controller;
 
-import com.xiaofei.springbootinit.common.BaseResponse;
-import com.xiaofei.springbootinit.common.ErrorCode;
-import com.xiaofei.springbootinit.common.ResultUtils;
+import com.xiaofei.springbootbackendcommon.common.BaseResponse;
+import com.xiaofei.springbootbackendcommon.common.ErrorCode;
+import com.xiaofei.springbootbackendcommon.common.ResultUtils;
 import com.xiaofei.springbootinit.model.entity.User;
 import com.xiaofei.springbootinit.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;

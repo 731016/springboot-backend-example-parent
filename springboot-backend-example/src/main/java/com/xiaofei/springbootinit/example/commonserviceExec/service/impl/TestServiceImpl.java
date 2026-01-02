@@ -1,7 +1,7 @@
 package com.xiaofei.springbootinit.example.commonserviceExec.service.impl;
 
-import com.xiaofei.springbootinit.common.BaseResponse;
-import com.xiaofei.springbootinit.common.ResultUtils;
+import com.xiaofei.springbootbackendcommon.common.BaseResponse;
+import com.xiaofei.springbootbackendcommon.common.ResultUtils;
 import com.xiaofei.springbootinit.example.commonserviceExec.model.dto.CommonServiceRequest;
 import com.xiaofei.springbootinit.example.commonserviceExec.service.TestService;
 import com.xiaofei.springbootinit.model.entity.User;

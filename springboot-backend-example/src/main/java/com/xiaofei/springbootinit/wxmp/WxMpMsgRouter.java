@@ -8,6 +8,7 @@ import me.chanjar.weixin.common.api.WxConsts.EventType;
 import me.chanjar.weixin.common.api.WxConsts.XmlMsgType;
 import me.chanjar.weixin.mp.api.WxMpMessageRouter;
 import me.chanjar.weixin.mp.api.WxMpService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class WxMpMsgRouter {
 
-    @Resource
+    @Autowired(required = false)
     private WxMpService wxMpService;
 
     @Resource

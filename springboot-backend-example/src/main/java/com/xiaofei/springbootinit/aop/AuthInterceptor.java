@@ -1,8 +1,8 @@
 package com.xiaofei.springbootinit.aop;
 
+import com.xiaofei.springbootbackendcommon.common.ErrorCode;
 import com.xiaofei.springbootinit.annotation.AuthCheck;
-import com.xiaofei.springbootinit.common.ErrorCode;
-import com.xiaofei.springbootinit.exception.BusinessException;
+import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import com.xiaofei.springbootinit.model.entity.User;
 import com.xiaofei.springbootinit.model.enums.UserRoleEnum;
 import com.xiaofei.springbootinit.service.UserService;

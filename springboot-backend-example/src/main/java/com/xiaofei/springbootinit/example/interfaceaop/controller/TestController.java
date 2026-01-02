@@ -1,7 +1,7 @@
 package com.xiaofei.springbootinit.example.interfaceaop.controller;
 
-import com.xiaofei.springbootinit.common.BaseResponse;
-import com.xiaofei.springbootinit.common.ResultUtils;
+import com.xiaofei.springbootbackendcommon.common.BaseResponse;
+import com.xiaofei.springbootbackendcommon.common.ResultUtils;
 import com.xiaofei.springbootinit.example.interfaceaop.annotation.ApiLog;
 import com.xiaofei.springbootinit.example.interfaceaop.annotation.Replayable;
 import com.xiaofei.springbootinit.example.interfaceaop.model.TestRequest;

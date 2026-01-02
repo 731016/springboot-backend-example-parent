@@ -2,13 +2,13 @@ package com.xiaofei.springbootinit.example.kafka.service;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.json.JSONUtil;
-import com.xiaofei.springbootinit.common.ErrorCode;
+import com.xiaofei.springbootbackendcommon.common.ErrorCode;
 import com.xiaofei.springbootinit.example.kafka.constants.KafkaConstants;
 import com.xiaofei.springbootinit.example.kafka.mapper.PointConfigMapper;
 import com.xiaofei.springbootinit.example.kafka.model.entity.PointConfig;
 import com.xiaofei.springbootinit.example.kafka.model.vo.TaskStatusVO;
 import com.xiaofei.springbootinit.example.kafka.task.CollDataTask;
-import com.xiaofei.springbootinit.exception.BusinessException;
+import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;

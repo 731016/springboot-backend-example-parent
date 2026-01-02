@@ -12,7 +12,9 @@
 
     <modules>
         <module>springboot-backend-example</module>
+        <module>springboot-backend-common</module>
         <module>online-code-executor-starter</module>
+        <module>springboot-backend-fileupload</module>
     </modules>
 
     <groupId>com.xiaofei</groupId>
@@ -64,25 +66,6 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring.boot.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-        </pluginManagement>
-    </build>
-
     <profiles>
         <profile>
             <id>dev</id>
@@ -90,7 +73,7 @@
                 <spring.profiles.active>dev</spring.profiles.active>
             </properties>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
         </profile>
         <profile>
@@ -108,8 +91,49 @@
                 <spring.profiles.active>prod</spring.profiles.active>
             </properties>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
         </profile>
     </profiles>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring.boot.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <skipTests>true</skipTests>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <resources>
+            <resource>
+                <!-- 指定配置文件所在的resource目录 -->
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>public/**</include>
+                    <include>static/**</include>
+                    <include>templates/**</include>
+                    <!-- 选择要打包的配置文件和日志，当然也可以不加打包所有配置文件，然后由具体服务器来选择使用哪个 -->
+                    <include>application-${spring.profiles.active}.yml</include>
+                    <include>logback-${spring.profiles.active}.xml</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
 </project>

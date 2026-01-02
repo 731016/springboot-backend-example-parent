@@ -2,8 +2,8 @@ package com.xiaofei.springbootinit.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.xiaofei.springbootinit.common.ErrorCode;
-import com.xiaofei.springbootinit.exception.BusinessException;
+import com.xiaofei.springbootbackendcommon.common.ErrorCode;
+import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import com.xiaofei.springbootinit.mapper.PostThumbMapper;
 import com.xiaofei.springbootinit.model.entity.Post;
 import com.xiaofei.springbootinit.model.entity.PostThumb;

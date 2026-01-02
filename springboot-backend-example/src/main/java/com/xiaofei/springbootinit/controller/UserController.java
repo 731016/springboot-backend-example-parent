@@ -2,15 +2,15 @@ package com.xiaofei.springbootinit.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.xiaofei.springbootbackendcommon.common.BaseResponse;
+import com.xiaofei.springbootbackendcommon.common.DeleteRequest;
+import com.xiaofei.springbootbackendcommon.common.ErrorCode;
+import com.xiaofei.springbootbackendcommon.common.ResultUtils;
 import com.xiaofei.springbootinit.annotation.AuthCheck;
-import com.xiaofei.springbootinit.common.BaseResponse;
-import com.xiaofei.springbootinit.common.DeleteRequest;
-import com.xiaofei.springbootinit.common.ErrorCode;
-import com.xiaofei.springbootinit.common.ResultUtils;
 import com.xiaofei.springbootinit.config.WxOpenConfig;
 import com.xiaofei.springbootinit.constant.UserConstant;
-import com.xiaofei.springbootinit.exception.BusinessException;
-import com.xiaofei.springbootinit.exception.ThrowUtils;
+import com.xiaofei.springbootbackendcommon.exception.BusinessException;
+import com.xiaofei.springbootbackendcommon.exception.ThrowUtils;
 import com.xiaofei.springbootinit.model.dto.user.UserAddRequest;
 import com.xiaofei.springbootinit.model.dto.user.UserLoginRequest;
 import com.xiaofei.springbootinit.model.dto.user.UserQueryRequest;
@@ -23,9 +23,6 @@ import com.xiaofei.springbootinit.model.vo.UserVO;
 import com.xiaofei.springbootinit.service.UserService;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +34,6 @@ import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
 import me.chanjar.weixin.mp.api.WxMpService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -155,7 +151,6 @@ public class UserController {
      */
     @GetMapping("/current")
     public BaseResponse<LoginUserVO> getLoginUser(HttpServletRequest request) {
-        log.warn("current sessionId={}", request.getSession().getId());
         User user = userService.getLoginUser(request);
         return ResultUtils.success(userService.getLoginUserVO(user));
     }

@@ -1,6 +1,6 @@
 package com.xiaofei.springbootinit.model.dto.postfavour;
 
-import com.xiaofei.springbootinit.common.PageRequest;
+import com.xiaofei.springbootbackendcommon.common.PageRequest;
 import com.xiaofei.springbootinit.model.dto.post.PostQueryRequest;
 import java.io.Serializable;
 import lombok.Data;

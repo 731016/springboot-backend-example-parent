@@ -1,8 +1,9 @@
 package com.xiaofei.springbootinit.model.dto.post;
 
-import com.xiaofei.springbootinit.common.PageRequest;
 import java.io.Serializable;
 import java.util.List;
+
+import com.xiaofei.springbootbackendcommon.common.PageRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

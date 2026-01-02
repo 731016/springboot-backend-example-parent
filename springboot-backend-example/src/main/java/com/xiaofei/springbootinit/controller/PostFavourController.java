@@ -1,11 +1,11 @@
 package com.xiaofei.springbootinit.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.xiaofei.springbootinit.common.BaseResponse;
-import com.xiaofei.springbootinit.common.ErrorCode;
-import com.xiaofei.springbootinit.common.ResultUtils;
-import com.xiaofei.springbootinit.exception.BusinessException;
-import com.xiaofei.springbootinit.exception.ThrowUtils;
+import com.xiaofei.springbootbackendcommon.common.BaseResponse;
+import com.xiaofei.springbootbackendcommon.common.ErrorCode;
+import com.xiaofei.springbootbackendcommon.common.ResultUtils;
+import com.xiaofei.springbootbackendcommon.exception.BusinessException;
+import com.xiaofei.springbootbackendcommon.exception.ThrowUtils;
 import com.xiaofei.springbootinit.model.dto.post.PostQueryRequest;
 import com.xiaofei.springbootinit.model.dto.postfavour.PostFavourAddRequest;
 import com.xiaofei.springbootinit.model.dto.postfavour.PostFavourQueryRequest;
@@ -52,7 +52,7 @@ public class PostFavourController {
      */
     @PostMapping("/")
     public BaseResponse<Integer> doPostFavour(@RequestBody PostFavourAddRequest postFavourAddRequest,
-            HttpServletRequest request) {
+                                              HttpServletRequest request) {
         if (postFavourAddRequest == null || postFavourAddRequest.getPostId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }

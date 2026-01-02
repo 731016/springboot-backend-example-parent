@@ -1,7 +1,7 @@
 package com.xiaofei.springbootinit.example.completablefuture;
 
-import com.xiaofei.springbootinit.common.ErrorCode;
-import com.xiaofei.springbootinit.exception.BusinessException;
+import com.xiaofei.springbootbackendcommon.common.ErrorCode;
+import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import com.xiaofei.springbootinit.model.entity.User;
 import lombok.extern.log4j.Log4j2;
 

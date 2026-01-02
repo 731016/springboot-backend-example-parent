@@ -1,7 +1,7 @@
 package com.xiaofei.springbootinit.example.kafka.controller;
 
-import com.xiaofei.springbootinit.common.BaseResponse;
-import com.xiaofei.springbootinit.common.ResultUtils;
+import com.xiaofei.springbootbackendcommon.common.BaseResponse;
+import com.xiaofei.springbootbackendcommon.common.ResultUtils;
 import com.xiaofei.springbootinit.example.kafka.model.dto.CollectedData;
 import com.xiaofei.springbootinit.example.kafka.model.dto.QueryCollectTask;
 import com.xiaofei.springbootinit.example.kafka.model.vo.TaskStatusVO;

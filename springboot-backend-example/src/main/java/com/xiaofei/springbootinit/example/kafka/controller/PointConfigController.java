@@ -1,12 +1,11 @@
 package com.xiaofei.springbootinit.example.kafka.controller;
 
-import com.xiaofei.springbootinit.common.BaseResponse;
-import com.xiaofei.springbootinit.common.ErrorCode;
-import com.xiaofei.springbootinit.common.ResultUtils;
+import com.xiaofei.springbootbackendcommon.common.BaseResponse;
+import com.xiaofei.springbootbackendcommon.common.ErrorCode;
+import com.xiaofei.springbootbackendcommon.common.ResultUtils;
 import com.xiaofei.springbootinit.example.kafka.model.dto.AddPointConfigRequest;
 import com.xiaofei.springbootinit.example.kafka.service.PointConfigService;
-import com.xiaofei.springbootinit.exception.BusinessException;
-import io.swagger.annotations.Tag;
+import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;

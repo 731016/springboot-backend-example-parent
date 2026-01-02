@@ -1,9 +1,9 @@
 package com.xiaofei.springbootinit.controller;
 
-import com.xiaofei.springbootinit.common.BaseResponse;
-import com.xiaofei.springbootinit.common.ErrorCode;
-import com.xiaofei.springbootinit.common.ResultUtils;
-import com.xiaofei.springbootinit.exception.BusinessException;
+import com.xiaofei.springbootbackendcommon.common.BaseResponse;
+import com.xiaofei.springbootbackendcommon.common.ErrorCode;
+import com.xiaofei.springbootbackendcommon.common.ResultUtils;
+import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import com.xiaofei.springbootinit.model.dto.postthumb.PostThumbAddRequest;
 import com.xiaofei.springbootinit.model.entity.User;
 import com.xiaofei.springbootinit.service.PostThumbService;
@@ -42,7 +42,7 @@ public class PostThumbController {
      */
     @PostMapping("/")
     public BaseResponse<Integer> doThumb(@RequestBody PostThumbAddRequest postThumbAddRequest,
-            HttpServletRequest request) {
+                                         HttpServletRequest request) {
         if (postThumbAddRequest == null || postThumbAddRequest.getPostId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
