@@ -1,12 +1,12 @@
-package com.xiaofei.springbootinit.example.redis.service.impl;
+package com.xiaofei.springbootbackendredis.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.xiaofei.springbootinit.example.redis.constants.RedisKeyConstants;
-import com.xiaofei.springbootinit.example.redis.mapper.CodeDictionaryMapper;
-import com.xiaofei.springbootinit.example.redis.model.entity.CodeDictionary;
-import com.xiaofei.springbootinit.example.redis.service.CodeDictionaryService;
+import com.xiaofei.springbootbackendredis.constants.RedisKeyConstants;
+import com.xiaofei.springbootbackendredis.mapper.CodeDictionaryMapper;
+import com.xiaofei.springbootbackendredis.model.entity.CodeDictionary;
+import com.xiaofei.springbootbackendredis.service.CodeDictionaryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;

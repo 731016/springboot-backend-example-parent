@@ -1,4 +1,4 @@
-package com.xiaofei.springbootinit.example.redis.constants;
+package com.xiaofei.springbootbackendredis.constants;
 
 import java.util.Date;
 

@@ -1,7 +1,7 @@
-package com.xiaofei.springbootinit.example.redis.mapper;
+package com.xiaofei.springbootbackendredis.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.xiaofei.springbootinit.example.redis.model.entity.CodeDictionary;
+import com.xiaofei.springbootbackendredis.model.entity.CodeDictionary;
 
 /**
  * @author tuaofei

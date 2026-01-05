@@ -1,9 +1,8 @@
-package com.xiaofei.springbootinit.example.redis.model.dto;
+package com.xiaofei.springbootbackendredis.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.checkerframework.checker.units.qual.A;
 
 import javax.validation.constraints.NotBlank;
 

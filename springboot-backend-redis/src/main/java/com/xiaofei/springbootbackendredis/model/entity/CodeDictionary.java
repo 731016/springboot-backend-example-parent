@@ -1,4 +1,4 @@
-package com.xiaofei.springbootinit.example.redis.model.entity;
+package com.xiaofei.springbootbackendredis.model.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.AllArgsConstructor;

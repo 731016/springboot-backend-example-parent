@@ -1,7 +1,7 @@
-package com.xiaofei.springbootinit.example.redis.service;
+package com.xiaofei.springbootbackendredis.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.xiaofei.springbootinit.example.redis.model.entity.CodeDictionary;
+import com.xiaofei.springbootbackendredis.model.entity.CodeDictionary;
 
 import java.util.List;
 

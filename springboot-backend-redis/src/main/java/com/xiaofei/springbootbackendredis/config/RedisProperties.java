@@ -1,4 +1,4 @@
-package com.xiaofei.springbootinit.config;
+package com.xiaofei.springbootbackendredis.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

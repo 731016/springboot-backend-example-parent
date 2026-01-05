@@ -1,4 +1,4 @@
-package com.xiaofei.springbootinit.config;
+package com.xiaofei.springbootbackendredis.config;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
