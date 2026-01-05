@@ -18,14 +18,6 @@ import javax.sql.DataSource;
  * @author
  */
 @Configuration
-@MapperScan({
-        "com.xiaofei.springbootinit.mapper",
-        "com.xiaofei.springbootinit.example.interfaceaop.mapper",
-        "com.xiaofei.springbootinit.example.commonserviceExec.mapper",
-        "com.xiaofei.springbootinit.example.quartz.mapper",
-        "com.xiaofei.springbootinit.example.kafka.mapper",
-        "com.xiaofei.springbootinit.example.redis.mapper"
-})
 public class MyBatisPlusConfig {
 
     @Resource(name = "dynamicDataSource")

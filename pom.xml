@@ -29,6 +29,8 @@
         <maven.compiler.target>17</maven.compiler.target>
         <spring.boot.version>2.7.2</spring.boot.version>
         <cn.hutool.version>5.8.8</cn.hutool.version>
+        <mybatis-spring-boot-starter-version>2.2.2</mybatis-spring-boot-starter-version>
+        <mybatis-plus-boot-starter-version>3.5.2</mybatis-plus-boot-starter-version>
     </properties>
 
     <dependencyManagement>
@@ -59,6 +61,16 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-aop</artifactId>
                 <version>${spring.boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-spring-boot-starter-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis-plus-boot-starter-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
