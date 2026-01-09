@@ -13,4 +13,7 @@ public interface RedisKeyConstants {
     Date EXPIRY_DATE = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000); // 24小时后
 
     String CACHE_KEY_PREFIX = "code_dictionary:";
+
+    String SOURCE_TYPE_REDIS = "redis";
+    String SOURCE_TYPE_DB = "db";
 }

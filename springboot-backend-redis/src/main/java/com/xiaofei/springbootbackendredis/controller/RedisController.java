@@ -9,6 +9,7 @@ import com.xiaofei.springbootbackendredis.model.entity.CodeDictionary;
 import com.xiaofei.springbootbackendredis.service.impl.CodeDictionaryServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,20 +41,14 @@ public class RedisController {
         return ResultUtils.success("清除缓存操作成功");
     }
 
-    @PostMapping("/getByAndTypeCode")
-    public BaseResponse<CodeDictionary> getByAndTypeCode() {
-        CodeDictionary byAndTypeCode = codeDictionaryService.getByAndTypeCode("USER", "TUAOFEI");
-        return ResultUtils.success(byAndTypeCode);
-    }
-
     @PostMapping("/getByType")
-    public BaseResponse<List<CodeDictionary>> getByType() {
-        List<CodeDictionary> user = codeDictionaryService.getByType("USER");
+    public BaseResponse<List<CodeDictionary>> getByType(@RequestBody CodeDictionary codeDictionary) {
+        List<CodeDictionary> user = codeDictionaryService.getByType(codeDictionary);
         return ResultUtils.success(user);
     }
 
     @PostMapping("/addCodeDictionary")
-    public BaseResponse<String> addCodeDictionary(CodeDictionaryDto codeDictionaryDto) {
+    public BaseResponse<String> addCodeDictionary(@RequestBody CodeDictionaryDto codeDictionaryDto) {
         if (codeDictionaryDto == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -69,7 +64,7 @@ public class RedisController {
     }
 
     @PostMapping("/addCodeDictionaryList")
-    public BaseResponse<String> addCodeDictionaryList(List<CodeDictionaryDto> codeDictionaryDtoList) {
+    public BaseResponse<String> addCodeDictionaryList(@RequestBody List<CodeDictionaryDto> codeDictionaryDtoList) {
         if (codeDictionaryDtoList == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }

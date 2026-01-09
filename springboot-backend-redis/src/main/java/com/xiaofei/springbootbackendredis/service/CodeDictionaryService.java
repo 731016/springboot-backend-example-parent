@@ -16,8 +16,6 @@ public interface CodeDictionaryService extends IService<CodeDictionary> {
 
     void clearCache();
 
-    CodeDictionary getByAndTypeCode(String type, String code);
-
-    List<CodeDictionary> getByType(String type);
+    List<CodeDictionary> getByType(CodeDictionary codeDictionary);
 
 }

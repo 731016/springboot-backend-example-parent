@@ -66,4 +66,10 @@ public class CodeDictionary implements Serializable {
     private String attr11;
 
     private String attr12;
+
+    /**
+     * 来源：reids、db
+     */
+    @TableField(exist = false)
+    private String sourceType;
 }
