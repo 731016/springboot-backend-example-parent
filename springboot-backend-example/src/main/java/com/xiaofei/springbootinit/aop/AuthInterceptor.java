@@ -6,6 +6,7 @@ import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import com.xiaofei.springbootinit.model.entity.User;
 import com.xiaofei.springbootinit.model.enums.UserRoleEnum;
 import com.xiaofei.springbootinit.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -17,6 +18,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import static com.xiaofei.springbootinit.constant.UserConstant.USER_LOGIN_STATE;
+
 /**
  * 权限校验 AOP
  *
@@ -25,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 @Aspect
 @Component
+@Slf4j
 public class AuthInterceptor {
 
     @Resource
@@ -42,6 +46,9 @@ public class AuthInterceptor {
         String mustRole = authCheck.mustRole();
         RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
+        // 在拦截器中
+        log.info("Interceptor Session ID: {}", request.getSession().getId());
+        log.info("Interceptor USER_LOGIN_STATE: {}", request.getSession().getAttribute(USER_LOGIN_STATE));
         // 当前登录用户
         User loginUser = userService.getLoginUser(request);
         UserRoleEnum mustRoleEnum = UserRoleEnum.getEnumByValue(mustRole);

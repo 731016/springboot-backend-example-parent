@@ -161,6 +161,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public User getLoginUser(HttpServletRequest request) {
+        // 在 UserService 中
+        log.info("Service Session ID: {}", request.getSession().getId());
+        log.info("Service USER_LOGIN_STATE: {}", request.getSession().getAttribute(USER_LOGIN_STATE));
         // 先判断是否已登录
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) userObj;
