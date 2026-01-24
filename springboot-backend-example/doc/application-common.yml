@@ -1,0 +1,22 @@
+# 公共配置文件
+# @author 
+# @from
+spring:
+  application:
+    name: springboot-backend-example
+  # 默认 dev 环境
+  profiles:
+    active: @spring.profiles.active@
+  # 支持 swagger3
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  # Elasticsearch 配置
+  # todo 需替换配置，然后取消注释
+  #  elasticsearch:
+  #    uris: http://localhost:9200
+  #    username: root
+  #    password: 123456
+  cache:
+    # 一般来说是不用配置的，Spring Cache 会根据依赖的包自行装配
+    type: redis
