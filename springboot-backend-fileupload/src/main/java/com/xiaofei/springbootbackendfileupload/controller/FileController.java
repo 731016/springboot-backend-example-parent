@@ -14,8 +14,10 @@ import com.xiaofei.springbootbackendfileupload.model.vo.FileVO;
 import com.xiaofei.springbootbackendfileupload.model.vo.PageFileVO;
 import com.xiaofei.springbootinit.annotation.AuthCheck;
 import com.xiaofei.springbootinit.constant.UserConstant;
+import com.xiaofei.springbootinit.example.interfaceaop.annotation.ApiLog;
 import com.xiaofei.springbootinit.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -52,6 +54,7 @@ public class FileController {
     private LocalFileManager localFileManager;
 
 
+    @ApiLog(value = "上传文件到本地")
     @PostMapping(value = "/uploadToLocal", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BaseResponse<String> uploadToLocal(@RequestParam("file") MultipartFile file, @RequestPart("uploadFileRequest") UploadFileRequest uploadFileRequest, HttpServletRequest request) {
         return localFileManager.uploadToLocal(file, uploadFileRequest, request);
@@ -65,6 +68,7 @@ public class FileController {
      * @param request
      * @return
      */
+    @ApiLog(value = "上传文件到远程")
     @PostMapping("/uploadToRemote")
     public BaseResponse<String> uploadFile(@RequestPart("file") MultipartFile multipartFile,
                                            @RequestPart("uploadFileRequest") UploadFileRequest uploadFileRequest, HttpServletRequest request) {
@@ -78,6 +82,7 @@ public class FileController {
      * @param request
      * @return
      */
+    @ApiLog(value = "查询所有远程用户头像")
     @PostMapping("/listCurrentDirRemoteUserAvatar")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<PageFileVO> listCurrentDirRemoteUserAvatar(@RequestBody PageFileRequest pageFileRequest,
@@ -93,6 +98,7 @@ public class FileController {
      * @param request
      * @return
      */
+    @ApiLog(value = "查询所有本地用户头像")
     @PostMapping("/listCurrentDirLocalUserAvatar")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<PageFileVO> listCurrentDirLocalUserAvatar(@RequestBody PageFileRequest pageFileRequest,
@@ -108,6 +114,7 @@ public class FileController {
      * @param request
      * @return
      */
+    @ApiLog(value = "查询当前远程用户头像tag")
     @PostMapping("/queryCurrentRemoteUserAvatarTags")
     public BaseResponse<FileVO> queryCurrentRemoteUserAvatarTags(@RequestBody PageFileRequest pageFileRequest,
                                                                  HttpServletRequest request) {
@@ -123,6 +130,7 @@ public class FileController {
      * @param request
      * @return
      */
+    @ApiLog(value = "删除远程用户头像")
     @DeleteMapping("/deleteRemoteUserAvatar")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<String> deleteRemoteUserAvatar(@RequestBody FileDeleteRequest fileDeleteRequest,
@@ -131,6 +139,7 @@ public class FileController {
         return ResultUtils.success("删除成功");
     }
 
+    @ApiLog(value = "删除本地用户头像")
     @DeleteMapping("/deleteLocalUserAvatar")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<String> deleteLocalUserAvatar(@RequestBody FileDeleteRequest fileDeleteRequest,
@@ -146,6 +155,7 @@ public class FileController {
      * @param request
      * @return
      */
+    @ApiLog(value = "下载远程用户头像")
     @PostMapping("/downloadRemoteUserAvatar")
     public BaseResponse<String> downloadRemoteUserAvatar(@RequestBody FileDownloadRequest fileDownloadRequest,
                                                    HttpServletRequest request, HttpServletResponse response) {
@@ -177,6 +187,7 @@ public class FileController {
      * @param response
      * @return
      */
+    @ApiLog(value = "下载本地用户头像")
     @PostMapping("/downloadLocalUserAvatar")
     public BaseResponse<String> downloadLocalUserAvatar(@RequestBody FileDownloadRequest fileDownloadRequest,
                                                         HttpServletRequest request, HttpServletResponse response) {
@@ -207,6 +218,7 @@ public class FileController {
      * @param remoteUrl
      * @return
      */
+    @ApiLog(value = "测试下载帆软PDF报表使用")
     @PostMapping("/downFileByRemoteUrl")
     public BaseResponse<String> downFileByRemoteUrl(@RequestParam String remoteUrl) {
         // 保存文件的本地路径

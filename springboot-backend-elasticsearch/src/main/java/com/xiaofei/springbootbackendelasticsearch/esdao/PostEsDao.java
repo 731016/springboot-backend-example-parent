@@ -1,4 +1,4 @@
-package com.xiaofei.springbootinit.esdao;
+package com.xiaofei.springbootbackendelasticsearch.esdao;
 
 import com.xiaofei.springbootinit.model.dto.post.PostEsDTO;
 import java.util.List;

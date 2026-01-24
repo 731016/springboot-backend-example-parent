@@ -16,6 +16,7 @@
         <module>online-code-executor-starter</module>
         <module>springboot-backend-fileupload</module>
         <module>springboot-backend-redis</module>
+        <module>springboot-backend-elasticsearch</module>
     </modules>
 
     <groupId>com.xiaofei</groupId>

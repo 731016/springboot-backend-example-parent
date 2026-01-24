@@ -7,6 +7,7 @@ import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import com.xiaofei.springbootbackendredis.model.dto.CodeDictionaryDto;
 import com.xiaofei.springbootbackendredis.model.entity.CodeDictionary;
 import com.xiaofei.springbootbackendredis.service.impl.CodeDictionaryServiceImpl;
+import com.xiaofei.springbootinit.example.interfaceaop.annotation.ApiLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,24 +30,28 @@ public class RedisController {
     @Autowired
     private CodeDictionaryServiceImpl codeDictionaryService;
 
+    @ApiLog(value = "加载缓存")
     @PostMapping("/loadCache")
     public BaseResponse<String> loadCache() {
         codeDictionaryService.loadCache();
         return ResultUtils.success("加载缓存操作成功");
     }
 
+    @ApiLog(value = "清除缓存")
     @PostMapping("/clearCache")
     public BaseResponse<String> clearCache() {
         codeDictionaryService.clearCache();
         return ResultUtils.success("清除缓存操作成功");
     }
 
+    @ApiLog(value = "根据类型获取字典")
     @PostMapping("/getByType")
     public BaseResponse<List<CodeDictionary>> getByType(@RequestBody CodeDictionary codeDictionary) {
         List<CodeDictionary> user = codeDictionaryService.getByType(codeDictionary);
         return ResultUtils.success(user);
     }
 
+    @ApiLog(value = "新增字典")
     @PostMapping("/addCodeDictionary")
     public BaseResponse<String> addCodeDictionary(@RequestBody CodeDictionaryDto codeDictionaryDto) {
         if (codeDictionaryDto == null) {
@@ -63,6 +68,7 @@ public class RedisController {
         return ResultUtils.error(ErrorCode.OPERATION_ERROR, "新增失败");
     }
 
+    @ApiLog(value = "批量新增字典")
     @PostMapping("/addCodeDictionaryList")
     public BaseResponse<String> addCodeDictionaryList(@RequestBody List<CodeDictionaryDto> codeDictionaryDtoList) {
         if (codeDictionaryDtoList == null) {

@@ -15,7 +15,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
                 "com.xiaofei.springbootinit"              // 把 example 模块的包也扫进来
         }
 )
-@EnableScheduling
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
 @MapperScan({
         "com.xiaofei.springbootbackendredis.mapper"

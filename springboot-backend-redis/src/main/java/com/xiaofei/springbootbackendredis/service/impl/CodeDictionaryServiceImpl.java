@@ -3,7 +3,6 @@ package com.xiaofei.springbootbackendredis.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.github.mustachejava.Code;
 import com.xiaofei.springbootbackendredis.constants.RedisKeyConstants;
 import com.xiaofei.springbootbackendredis.mapper.CodeDictionaryMapper;
 import com.xiaofei.springbootbackendredis.model.entity.CodeDictionary;

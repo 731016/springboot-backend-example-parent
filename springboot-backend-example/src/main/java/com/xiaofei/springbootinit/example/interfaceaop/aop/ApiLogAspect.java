@@ -50,6 +50,13 @@ public class ApiLogAspect {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
 
+        String methodName = point.getSignature().getName();
+        
+        // 排除登录和注册方法
+        if ("userLogin".equals(methodName) || "userRegister".equals(methodName) || "userLoginByWxOpen".equals(methodName)) {
+            return point.proceed();
+        }
+
         User loginUser = userService.getLoginUser(request);
 
         // 记录请求信息

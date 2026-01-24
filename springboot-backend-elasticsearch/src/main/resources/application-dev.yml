@@ -1,4 +1,6 @@
 spring:
+  session:
+    store-type: redis
   # 数据库配置
   datasource:
     master:
@@ -11,7 +13,13 @@ spring:
       driver-class-name: com.mysql.cj.jdbc.Driver
       username: root
       password: root
-  # Redis 配置
+  # Elasticsearch 配置
+  # todo 需替换配置，然后取消注释
+  elasticsearch:
+    uris: http://localhost:9200
+    username: root
+    password: 123456
+  # Redis 配置 共享session使用，每个模块必备
   redis:
     host: localhost
     port: 6379
@@ -39,7 +47,7 @@ mybatis-plus:
       logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
 server:
   address: 0.0.0.0
-  port: 8103
+  port: 8104
   servlet:
     context-path: /api
     # cookie 30 天过期
@@ -56,4 +64,4 @@ knife4j:
       default:
         api-rule: package
         api-rule-resources:
-          - com.xiaofei.springbootbackendredis.controller
+          - com.xiaofei.springbootbackendelasticsearch.controller

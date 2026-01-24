@@ -1,15 +1,15 @@
 package com.xiaofei.springbootinit.job.once;
 
-import com.xiaofei.springbootinit.esdao.PostEsDao;
+import cn.hutool.core.collection.CollUtil;
 import com.xiaofei.springbootinit.model.dto.post.PostEsDTO;
 import com.xiaofei.springbootinit.model.entity.Post;
 import com.xiaofei.springbootinit.service.PostService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
+
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
-import cn.hutool.core.collection.CollUtil;
-import org.springframework.boot.CommandLineRunner;
 
 /**
  * 全量同步帖子到 es
@@ -25,8 +25,8 @@ public class FullSyncPostToEs implements CommandLineRunner {
     @Resource
     private PostService postService;
 
-    @Resource
-    private PostEsDao postEsDao;
+//    @Resource
+//    private PostEsDao postEsDao;
 
     @Override
     public void run(String... args) {
@@ -34,15 +34,15 @@ public class FullSyncPostToEs implements CommandLineRunner {
         if (CollUtil.isEmpty(postList)) {
             return;
         }
-        List<PostEsDTO> postEsDTOList = postList.stream().map(PostEsDTO::objToDto).collect(Collectors.toList());
+//        List<PostEsDTO> postEsDTOList = postList.stream().map(PostEsDTO::objToDto).collect(Collectors.toList());
         final int pageSize = 500;
-        int total = postEsDTOList.size();
-        log.info("FullSyncPostToEs start, total {}", total);
-        for (int i = 0; i < total; i += pageSize) {
-            int end = Math.min(i + pageSize, total);
-            log.info("sync from {} to {}", i, end);
-            postEsDao.saveAll(postEsDTOList.subList(i, end));
-        }
-        log.info("FullSyncPostToEs end, total {}", total);
+//        int total = postEsDTOList.size();
+//        log.info("FullSyncPostToEs start, total {}", total);
+//        for (int i = 0; i < total; i += pageSize) {
+//            int end = Math.min(i + pageSize, total);
+//            log.info("sync from {} to {}", i, end);
+//            postEsDao.saveAll(postEsDTOList.subList(i, end));
+//        }
+//        log.info("FullSyncPostToEs end, total {}", total);
     }
 }
