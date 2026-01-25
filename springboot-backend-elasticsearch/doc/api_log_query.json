@@ -1,0 +1,20 @@
+GET /api_log_2026-01-25/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+GET /api_log_2026-01-25/_mapping
+
+GET /api_log_2026-01-25/_search
+{
+  "query": {
+    "range": {
+      "createTime": {
+        "gte": "2026-01-25 00:00:00",
+        "lte": "2026-01-26 23:59:59"
+      }
+    }
+  }
+}

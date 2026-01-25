@@ -17,15 +17,17 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 )
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
 @EnableScheduling
-//@MapperScan({
-//        "com.xiaofei.springbootbackendelasticsearch.mapper"
-//})
+@MapperScan({
+        "com.xiaofei.springbootbackendelasticsearch.mapper",
+        "com.xiaofei.springbootinit.mapper",
+        "com.xiaofei.springbootinit.example.interfaceaop.mapper",
+        "com.xiaofei.springbootinit.example.commonserviceExec.mapper",
+        "com.xiaofei.springbootinit.example.quartz.mapper",
+        "com.xiaofei.springbootinit.example.kafka.mapper"
+})
 public class ElasticsearchApplication {
 
     public static void main(String[] args) {
-        //todo
-        // 1.实现一个用户同步到es,和用户信息查询
-        // 2.日志信息同步到es，和日志信息查询，日志高亮查询，根据日期动态创建索引
         SpringApplication.run(ElasticsearchApplication.class, args);
     }
 

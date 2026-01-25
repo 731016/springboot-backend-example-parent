@@ -4,6 +4,9 @@ import com.xiaofei.springbootbackendcommon.common.BaseResponse;
 import com.xiaofei.springbootbackendcommon.common.ResultUtils;
 import com.xiaofei.springbootbackendelasticsearch.esdao.UserEsDao;
 import com.xiaofei.springbootbackendelasticsearch.model.dto.UserEsDTO;
+import com.xiaofei.springbootbackendelasticsearch.model.dto.UserEsQueryRequest;
+import com.xiaofei.springbootbackendelasticsearch.service.UserEsService;
+import com.xiaofei.springbootinit.model.dto.user.UserQueryRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -17,6 +20,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,9 +31,9 @@ public class UserEsController {
 
     @Resource
     private UserEsDao userEsDao;
-    
+
     @Resource
-    private ElasticsearchRestTemplate elasticsearchRestTemplate;
+    private UserEsService userEsService;
 
     /**
      * 同步/保存用户到 ES
@@ -61,27 +65,10 @@ public class UserEsController {
     /**
      * 搜索用户
      */
-    @GetMapping("/search")
-    public BaseResponse<List<UserEsDTO>> searchUser(@RequestParam(required = false) String searchText,
-                                                    @RequestParam(defaultValue = "0") int current,
-                                                    @RequestParam(defaultValue = "10") int pageSize) {
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        if (StringUtils.hasText(searchText)) {
-            boolQueryBuilder.should(QueryBuilders.matchQuery("userName", searchText));
-            boolQueryBuilder.should(QueryBuilders.matchQuery("userProfile", searchText));
-            boolQueryBuilder.minimumShouldMatch(1);
-        }
-        // 过滤已删除
-        boolQueryBuilder.filter(QueryBuilders.termQuery("isDelete", 0));
-
-        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(boolQueryBuilder)
-                .withPageable(PageRequest.of(current, pageSize))
-                .build();
-
-        SearchHits<UserEsDTO> searchHits = elasticsearchRestTemplate.search(searchQuery, UserEsDTO.class);
-        List<UserEsDTO> resultList = searchHits.stream().map(SearchHit::getContent).collect(Collectors.toList());
-        
+    @PostMapping("/search")
+    public BaseResponse<List<UserEsDTO>> searchUser(@RequestBody UserEsQueryRequest userEsQueryRequest,
+                                                    HttpServletRequest request) {
+        List<UserEsDTO> resultList = userEsService.search(userEsQueryRequest);
         return ResultUtils.success(resultList);
     }
 }

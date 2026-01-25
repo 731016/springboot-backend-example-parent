@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- @author  -->
+<!-- @from  -->
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaofei.springbootinit.example.interfaceaop.mapper.ApiLogMapper">
+    <resultMap id="BaseResultMap" type="com.xiaofei.springbootinit.example.interfaceaop.model.ApiLog">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="requestId" column="request_id" jdbcType="VARCHAR"/>
+        <result property="url" column="url" jdbcType="VARCHAR"/>
+        <result property="httpMethod" column="http_method" jdbcType="VARCHAR"/>
+        <result property="ip" column="ip" jdbcType="VARCHAR"/>
+        <result property="classMethod" column="class_method" jdbcType="VARCHAR"/>
+        <result property="requestParams" column="request_params" jdbcType="VARCHAR"/>
+        <result property="responseData" column="response_data" jdbcType="VARCHAR"/>
+        <result property="timeConsumed" column="time_consumed" jdbcType="BIGINT"/>
+        <result property="userId" column="user_id" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <select id="listApiLogsAfterTime" resultMap="BaseResultMap">
+        select *
+        from api_log
+        where create_time >= #{minCreateTime}
+        order by create_time asc
+    </select>
+</mapper>

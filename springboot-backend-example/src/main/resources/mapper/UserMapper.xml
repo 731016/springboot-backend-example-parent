@@ -29,4 +29,12 @@
         from user
         where updateTime >= #{minUpdateTime}
     </select>
+
+    <select id="listDeletedUsers" resultType="com.xiaofei.springbootinit.model.entity.User">
+        select *
+        from user
+        where isDelete = 1
+          and updateTime >= #{minUpdateTime}
+        order by updateTime asc
+    </select>
 </mapper>

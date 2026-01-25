@@ -22,6 +22,13 @@ public interface UserMapper extends BaseMapper<User> {
      */
     List<User> listPostWithDelete(Date minUpdateTime);
 
+    /**
+     * 查询已删除的用户列表（增量查询）
+     * @param minUpdateTime 最小更新时间
+     * @return 已删除的用户列表
+     */
+    List<User> listDeletedUsers(Date minUpdateTime);
+
 }
 
 

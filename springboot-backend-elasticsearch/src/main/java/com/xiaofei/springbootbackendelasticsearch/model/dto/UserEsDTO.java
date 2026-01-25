@@ -50,6 +50,13 @@ public class UserEsDTO implements Serializable {
     private Integer isDelete;
 
     /**
+     * 高亮字段 - 用于存储高亮后的文本（不映射到 ES）
+     */
+    private String highlightUserAccount;
+    private String highlightUserName;
+    private String highlightUserProfile;
+
+    /**
      * 对象转包装类
      *
      * @param user

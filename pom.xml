@@ -138,6 +138,7 @@
                     <include>public/**</include>
                     <include>static/**</include>
                     <include>templates/**</include>
+                    <include>mapper/**</include>
                     <!-- 选择要打包的配置文件和日志，当然也可以不加打包所有配置文件，然后由具体服务器来选择使用哪个 -->
                     <include>application-${spring.profiles.active}.yml</include>
                     <include>logback-${spring.profiles.active}.xml</include>

@@ -1,0 +1,37 @@
+GET /user/_search
+{
+  "from": 0,
+  "size": 10,
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "wildcard": {
+            "userAccount": {
+              "value": "*tuaofei*",
+              "case_insensitive": true
+            }
+          }
+        },
+        {
+          "match": {
+            "userName": "搜索关键词"
+          }
+        },
+        {
+          "match": {
+            "userProfile": "搜索关键词"
+          }
+        }
+      ],
+      "minimum_should_match": 1,
+      "filter": [
+        {
+          "term": {
+            "isDelete": 0
+          }
+        }
+      ]
+    }
+  }
+}
