@@ -39,9 +39,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import static com.xiaofei.springbootbackendfileupload.constant.FileConstant.COS_HOST;
-
-
 /**
  * Cos 对象存储操作
  *
@@ -129,7 +126,7 @@ public class CosManager {
             multipartFile.transferTo(file);
             putObject(filepath, file);
             // 返回可访问地址
-            return ResultUtils.success(COS_HOST + filepath);
+            return ResultUtils.success(cosClientConfig.getHost() + filepath);
         } catch (Exception e) {
             log.error("file upload error, filepath = " + filepath, e);
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "上传失败");
@@ -225,7 +222,7 @@ public class CosManager {
                 continue;
             }
 
-            String userAvatar = String.format("%s/%s", COS_HOST, key);
+            String userAvatar = String.format("%s/%s", cosClientConfig.getHost(), key);
 
             // 文件的 etag
             String etag = cosObjectSummary.getETag();

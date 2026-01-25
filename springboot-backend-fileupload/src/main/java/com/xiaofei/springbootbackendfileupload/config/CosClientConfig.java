@@ -41,6 +41,11 @@ public class CosClientConfig {
      */
     private String bucket;
 
+    /**
+     * COS 访问地址
+     */
+    private String host;
+
     @Bean
     public COSClient cosClient() {
         // 初始化用户身份信息(secretId, secretKey)
