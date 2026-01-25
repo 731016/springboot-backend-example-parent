@@ -2,10 +2,7 @@ package com.xiaofei.springbootinit.example.kafka.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.xiaofei.springbootinit.example.kafka.model.entity.DataDetail;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -17,6 +14,7 @@ import java.util.Map;
  * @description TODO
  * @date 2024/12/26
  */
+@Mapper
 public interface DataDetailMapper extends BaseMapper<DataDetail> {
 
     /**

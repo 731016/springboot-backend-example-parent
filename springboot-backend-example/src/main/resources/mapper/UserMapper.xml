@@ -23,4 +23,10 @@
         userName,userAvatar,userProfile,
         userRole,createTime,updateTime,isDelete
     </sql>
+
+    <select id="listPostWithDelete" resultType="com.xiaofei.springbootinit.model.entity.User">
+        select *
+        from user
+        where updateTime >= #{minUpdateTime}
+    </select>
 </mapper>

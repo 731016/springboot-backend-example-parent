@@ -3,6 +3,7 @@ package com.xiaofei.springbootinit.example.quartz.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xiaofei.springbootinit.example.quartz.model.entity.JobAndTrigger;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
  * @description TODO
  * @date 2024/12/25
  */
+@Mapper
 public interface JobMapper extends BaseMapper<JobAndTrigger> {
 
     /**

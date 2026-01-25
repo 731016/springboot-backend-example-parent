@@ -60,11 +60,6 @@ public class PostEsDTO implements Serializable {
     private Integer favourNum;
 
     /**
-     * 创建用户 id
-     */
-    private Long userId;
-
-    /**
      * 创建时间
      */
 //    @Field(index = false, store = true, type = FieldType.Date, format = {}, pattern = DATE_TIME_PATTERN)

@@ -6,6 +6,7 @@ import com.xiaofei.springbootbackendcommon.common.ResultUtils;
 import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import com.xiaofei.springbootbackendredis.model.dto.CodeDictionaryDto;
 import com.xiaofei.springbootbackendredis.model.entity.CodeDictionary;
+import com.xiaofei.springbootbackendredis.service.CodeDictionaryService;
 import com.xiaofei.springbootbackendredis.service.impl.CodeDictionaryServiceImpl;
 import com.xiaofei.springbootinit.example.interfaceaop.annotation.ApiLog;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,8 +29,8 @@ import java.util.List;
 @RequestMapping("/cache")
 public class RedisController {
 
-    @Autowired
-    private CodeDictionaryServiceImpl codeDictionaryService;
+    @Resource
+    private CodeDictionaryService codeDictionaryService;
 
     @ApiLog(value = "加载缓存")
     @PostMapping("/loadCache")

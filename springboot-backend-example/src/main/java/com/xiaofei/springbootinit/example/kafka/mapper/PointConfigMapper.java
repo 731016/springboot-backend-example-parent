@@ -2,6 +2,7 @@ package com.xiaofei.springbootinit.example.kafka.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.xiaofei.springbootinit.example.kafka.model.entity.PointConfig;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -13,6 +14,7 @@ import java.util.List;
  * @description TODO
  * @date 2024/12/26
  */
+@Mapper
 public interface PointConfigMapper extends BaseMapper<PointConfig> {
 
 

@@ -13,7 +13,7 @@ import java.util.List;
  * @author <a href="http://xiaofei.site>计算机知识杂货铺</a>
  * @from 
  */
-
+@Mapper
 public interface PostMapper extends BaseMapper<Post> {
 
     /**

@@ -1,14 +1,14 @@
 package com.xiaofei.springbootbackendredis;
 
+import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure;
 import com.binarywang.spring.starter.wxjava.mp.config.WxMpAutoConfiguration;
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication(exclude = {WxMpAutoConfiguration.class})
+@SpringBootApplication(exclude = {WxMpAutoConfiguration.class, DataSourceAutoConfiguration.class, DruidDataSourceAutoConfigure.class})
 @ComponentScan(
         basePackages = {
                 "com.xiaofei.springbootbackendredis", // 自己
@@ -16,9 +16,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         }
 )
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
-@MapperScan({
-        "com.xiaofei.springbootbackendredis.mapper"
-})
 public class RedisApplication {
 
     public static void main(String[] args) {

@@ -16,7 +16,7 @@ import org.apache.ibatis.annotations.Param;
  * @author <a href="http://xiaofei.site>计算机知识杂货铺</a>
  * @from 
  */
-
+@Mapper
 public interface PostFavourMapper extends BaseMapper<PostFavour> {
 
     /**

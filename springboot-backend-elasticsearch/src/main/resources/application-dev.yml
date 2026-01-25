@@ -17,8 +17,8 @@ spring:
   # todo 需替换配置，然后取消注释
   elasticsearch:
     uris: http://localhost:9200
-    username: root
-    password: 123456
+    username:
+    password:
   # Redis 配置 共享session使用，每个模块必备
   redis:
     host: localhost
@@ -53,7 +53,11 @@ server:
     # cookie 30 天过期
     session:
       cookie:
+#        name: SESSION  # Session Cookie 名称，所有模块必须一致
+#        path: /api     # Session Cookie 路径，所有模块必须一致
         max-age: 2592000
+#        http-only: true
+#        same-site: lax
 # 接口文档配置
 knife4j:
   enable: true

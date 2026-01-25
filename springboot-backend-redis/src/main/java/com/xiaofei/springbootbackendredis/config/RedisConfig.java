@@ -23,6 +23,7 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import javax.annotation.Resource;
 import java.io.Serializable;
 
 /**
@@ -36,7 +37,7 @@ import java.io.Serializable;
 public class RedisConfig {
 
 
-    @Autowired
+    @Resource
     private RedisProperties redisProperties;
 
     @Bean
@@ -44,7 +45,10 @@ public class RedisConfig {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
         redisStandaloneConfiguration.setHostName(redisProperties.getHost());
         redisStandaloneConfiguration.setPort(redisProperties.getPort());
-        return new LettuceConnectionFactory(redisStandaloneConfiguration);
+        redisStandaloneConfiguration.setDatabase(redisProperties.getDatabase()); // 必须与配置文件中的 database: 1 保持一致，确保所有模块使用同一个 Redis database
+        LettuceConnectionFactory factory = new LettuceConnectionFactory(redisStandaloneConfiguration);
+        factory.afterPropertiesSet();
+        return factory;
     }
 
     /**

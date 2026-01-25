@@ -2,6 +2,7 @@ package com.xiaofei.springbootinit.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.xiaofei.springbootinit.model.entity.LogData;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
 * @author Administrator
@@ -9,6 +10,7 @@ import com.xiaofei.springbootinit.model.entity.LogData;
 * @createDate 2025-08-05 21:51:08
 * @Entity generator.domain.LogData
 */
+@Mapper
 public interface LogDataMapper extends BaseMapper<LogData> {
 
 }
