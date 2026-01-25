@@ -1,4 +1,4 @@
-package com.xiaofei.springbootinit.example.interfaceaop.service.impl;
+package com.xiaofei.springbootinit.service.impl;
 
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
@@ -7,9 +7,9 @@ import cn.hutool.http.Method;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.xiaofei.springbootbackendcommon.common.ErrorCode;
-import com.xiaofei.springbootinit.example.interfaceaop.mapper.ApiRequestRecordMapper;
-import com.xiaofei.springbootinit.example.interfaceaop.model.ApiRequestRecord;
-import com.xiaofei.springbootinit.example.interfaceaop.service.ApiReplayService;
+import com.xiaofei.springbootinit.mapper.ApiRequestRecordMapper;
+import com.xiaofei.springbootinit.model.entity.ApiRequestRecord;
+import com.xiaofei.springbootinit.service.ApiReplayService;
 import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

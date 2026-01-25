@@ -1,4 +1,4 @@
-package com.xiaofei.springbootinit.example.interfaceaop.service;
+package com.xiaofei.springbootinit.service;
 
 /**
  * @author tuaofei

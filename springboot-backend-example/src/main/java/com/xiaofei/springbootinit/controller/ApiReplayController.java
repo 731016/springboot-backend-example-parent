@@ -1,11 +1,11 @@
-package com.xiaofei.springbootinit.example.interfaceaop.controller;
+package com.xiaofei.springbootinit.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xiaofei.springbootbackendcommon.common.BaseResponse;
 import com.xiaofei.springbootbackendcommon.common.ResultUtils;
-import com.xiaofei.springbootinit.example.interfaceaop.model.ApiRequestRecord;
-import com.xiaofei.springbootinit.example.interfaceaop.service.ApiReplayService;
-import com.xiaofei.springbootinit.example.interfaceaop.mapper.ApiRequestRecordMapper;
+import com.xiaofei.springbootinit.model.entity.ApiRequestRecord;
+import com.xiaofei.springbootinit.service.ApiReplayService;
+import com.xiaofei.springbootinit.mapper.ApiRequestRecordMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 

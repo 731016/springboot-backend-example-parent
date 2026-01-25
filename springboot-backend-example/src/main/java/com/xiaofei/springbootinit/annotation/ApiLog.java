@@ -1,4 +1,4 @@
-package com.xiaofei.springbootinit.example.interfaceaop.annotation;
+package com.xiaofei.springbootinit.annotation;
 
 /**
  * @author tuaofei

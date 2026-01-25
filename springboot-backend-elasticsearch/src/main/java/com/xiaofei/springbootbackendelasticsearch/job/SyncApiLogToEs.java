@@ -2,8 +2,8 @@ package com.xiaofei.springbootbackendelasticsearch.job;
 
 import cn.hutool.core.collection.CollUtil;
 import com.xiaofei.springbootbackendelasticsearch.model.dto.ApiLogEsDTO;
-import com.xiaofei.springbootinit.example.interfaceaop.mapper.ApiLogMapper;
-import com.xiaofei.springbootinit.example.interfaceaop.model.ApiLog;
+import com.xiaofei.springbootinit.mapper.ApiLogMapper;
+import com.xiaofei.springbootinit.model.entity.ApiLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.document.Document;

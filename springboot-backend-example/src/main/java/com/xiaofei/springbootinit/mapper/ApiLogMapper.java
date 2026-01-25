@@ -1,7 +1,7 @@
-package com.xiaofei.springbootinit.example.interfaceaop.mapper;
+package com.xiaofei.springbootinit.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.xiaofei.springbootinit.example.interfaceaop.model.ApiLog;
+import com.xiaofei.springbootinit.model.entity.ApiLog;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

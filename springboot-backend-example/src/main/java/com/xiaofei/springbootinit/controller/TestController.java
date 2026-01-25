@@ -1,10 +1,10 @@
-package com.xiaofei.springbootinit.example.interfaceaop.controller;
+package com.xiaofei.springbootinit.controller;
 
 import com.xiaofei.springbootbackendcommon.common.BaseResponse;
 import com.xiaofei.springbootbackendcommon.common.ResultUtils;
-import com.xiaofei.springbootinit.example.interfaceaop.annotation.ApiLog;
-import com.xiaofei.springbootinit.example.interfaceaop.annotation.Replayable;
-import com.xiaofei.springbootinit.example.interfaceaop.model.TestRequest;
+import com.xiaofei.springbootinit.annotation.ApiLog;
+import com.xiaofei.springbootinit.annotation.Replayable;
+import com.xiaofei.springbootinit.model.entity.TestRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

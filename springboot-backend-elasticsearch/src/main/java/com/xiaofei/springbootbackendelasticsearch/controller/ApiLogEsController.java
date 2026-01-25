@@ -5,6 +5,7 @@ import com.xiaofei.springbootbackendcommon.common.ResultUtils;
 import com.xiaofei.springbootbackendelasticsearch.model.dto.ApiLogEsDTO;
 import com.xiaofei.springbootbackendelasticsearch.model.dto.ApiLogEsQueryRequest;
 import com.xiaofei.springbootbackendelasticsearch.service.ApiLogEsService;
+import com.xiaofei.springbootinit.annotation.ApiLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ public class ApiLogEsController {
     /**
      * 同步日志到 ES
      */
+    @ApiLog(value = "同步日志到 ES")
     @PostMapping("/sync")
     public BaseResponse<Boolean> syncApiLog(@RequestBody ApiLogEsDTO apiLogEsDTO) {
         Boolean result = apiLogEsService.syncApiLog(apiLogEsDTO);
@@ -38,6 +40,7 @@ public class ApiLogEsController {
     /**
      * 搜索日志
      */
+    @ApiLog(value = "搜索日志")
     @PostMapping("/search")
     public BaseResponse<List<ApiLogEsDTO>> searchApiLog(@RequestBody ApiLogEsQueryRequest queryRequest,
                                                          HttpServletRequest request) {

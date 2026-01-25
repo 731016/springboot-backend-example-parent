@@ -1,7 +1,7 @@
-package com.xiaofei.springbootinit.example.interfaceaop.mapper;
+package com.xiaofei.springbootinit.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.xiaofei.springbootinit.example.interfaceaop.model.ApiRequestRecord;
+import com.xiaofei.springbootinit.model.entity.ApiRequestRecord;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

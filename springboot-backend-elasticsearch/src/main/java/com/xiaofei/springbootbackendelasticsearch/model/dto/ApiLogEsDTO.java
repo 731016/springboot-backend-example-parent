@@ -1,6 +1,6 @@
 package com.xiaofei.springbootbackendelasticsearch.model.dto;
 
-import com.xiaofei.springbootinit.example.interfaceaop.model.ApiLog;
+import com.xiaofei.springbootinit.model.entity.ApiLog;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.annotation.Id;

@@ -11,7 +11,7 @@ import com.xiaofei.springbootinit.config.WxOpenConfig;
 import com.xiaofei.springbootinit.constant.UserConstant;
 import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import com.xiaofei.springbootbackendcommon.exception.ThrowUtils;
-import com.xiaofei.springbootinit.example.interfaceaop.annotation.ApiLog;
+import com.xiaofei.springbootinit.annotation.ApiLog;
 import com.xiaofei.springbootinit.model.dto.user.UserAddRequest;
 import com.xiaofei.springbootinit.model.dto.user.UserLoginRequest;
 import com.xiaofei.springbootinit.model.dto.user.UserQueryRequest;

@@ -4,8 +4,8 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.xiaofei.springbootinit.example.interfaceaop.mapper.ApiLogMapper">
-    <resultMap id="BaseResultMap" type="com.xiaofei.springbootinit.example.interfaceaop.model.ApiLog">
+<mapper namespace="com.xiaofei.springbootinit.mapper.ApiLogMapper">
+    <resultMap id="BaseResultMap" type="com.xiaofei.springbootinit.model.entity.ApiLog">
         <id property="id" column="id" jdbcType="BIGINT"/>
         <result property="requestId" column="request_id" jdbcType="VARCHAR"/>
         <result property="url" column="url" jdbcType="VARCHAR"/>

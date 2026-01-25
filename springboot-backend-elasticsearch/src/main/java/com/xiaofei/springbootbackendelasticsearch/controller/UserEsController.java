@@ -6,6 +6,7 @@ import com.xiaofei.springbootbackendelasticsearch.esdao.UserEsDao;
 import com.xiaofei.springbootbackendelasticsearch.model.dto.UserEsDTO;
 import com.xiaofei.springbootbackendelasticsearch.model.dto.UserEsQueryRequest;
 import com.xiaofei.springbootbackendelasticsearch.service.UserEsService;
+import com.xiaofei.springbootinit.annotation.ApiLog;
 import com.xiaofei.springbootinit.model.dto.user.UserQueryRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -38,6 +39,7 @@ public class UserEsController {
     /**
      * 同步/保存用户到 ES
      */
+    @ApiLog(value = "同步/保存用户到 ES")
     @PostMapping("/sync")
     public BaseResponse<Boolean> syncUser(@RequestBody UserEsDTO userEsDTO) {
         userEsDao.save(userEsDTO);
@@ -47,6 +49,7 @@ public class UserEsController {
     /**
      * 批量同步
      */
+    @ApiLog(value = "批量同步")
     @PostMapping("/sync/batch")
     public BaseResponse<Boolean> syncUserBatch(@RequestBody List<UserEsDTO> userEsDTOList) {
         userEsDao.saveAll(userEsDTOList);
@@ -56,6 +59,7 @@ public class UserEsController {
     /**
      * 删除用户
      */
+    @ApiLog(value = "删除用户")
     @PostMapping("/delete")
     public BaseResponse<Boolean> deleteUser(@RequestParam Long id) {
         userEsDao.deleteById(id);
@@ -65,6 +69,7 @@ public class UserEsController {
     /**
      * 搜索用户
      */
+    @ApiLog(value = "搜索用户")
     @PostMapping("/search")
     public BaseResponse<List<UserEsDTO>> searchUser(@RequestBody UserEsQueryRequest userEsQueryRequest,
                                                     HttpServletRequest request) {

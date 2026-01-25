@@ -1,8 +1,8 @@
-package com.xiaofei.springbootinit.example.interfaceaop.aop;
+package com.xiaofei.springbootinit.aop;
 
 import cn.hutool.json.JSONUtil;
-import com.xiaofei.springbootinit.example.interfaceaop.mapper.ApiLogMapper;
-import com.xiaofei.springbootinit.example.interfaceaop.model.ApiLog;
+import com.xiaofei.springbootinit.mapper.ApiLogMapper;
+import com.xiaofei.springbootinit.model.entity.ApiLog;
 import com.xiaofei.springbootinit.model.entity.User;
 import com.xiaofei.springbootinit.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ public class ApiLogAspect {
     @Resource
     private UserService userService;
 
-    @Pointcut("@annotation(com.xiaofei.springbootinit.example.interfaceaop.annotation.ApiLog)")
+    @Pointcut("@annotation(com.xiaofei.springbootinit.annotation.ApiLog)")
     public void apiLogPointcut() {
     }
 

@@ -20,7 +20,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @MapperScan({
         "com.xiaofei.springbootbackendelasticsearch.mapper",
         "com.xiaofei.springbootinit.mapper",
-        "com.xiaofei.springbootinit.example.interfaceaop.mapper",
         "com.xiaofei.springbootinit.example.commonserviceExec.mapper",
         "com.xiaofei.springbootinit.example.quartz.mapper",
         "com.xiaofei.springbootinit.example.kafka.mapper"

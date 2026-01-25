@@ -1,8 +1,8 @@
-package com.xiaofei.springbootinit.example.interfaceaop.aop;
+package com.xiaofei.springbootinit.aop;
 
 import cn.hutool.json.JSONUtil;
-import com.xiaofei.springbootinit.example.interfaceaop.mapper.ApiRequestRecordMapper;
-import com.xiaofei.springbootinit.example.interfaceaop.model.ApiRequestRecord;
+import com.xiaofei.springbootinit.mapper.ApiRequestRecordMapper;
+import com.xiaofei.springbootinit.model.entity.ApiRequestRecord;
 import com.xiaofei.springbootinit.model.entity.User;
 import com.xiaofei.springbootinit.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class ReplayableAspect {
     @Resource
     private UserService userService;
 
-    @Pointcut("@annotation(com.xiaofei.springbootinit.example.interfaceaop.annotation.Replayable)")
+    @Pointcut("@annotation(com.xiaofei.springbootinit.annotation.Replayable)")
     public void replayablePointcut() {}
 
     @Around("replayablePointcut()")
