@@ -5,6 +5,8 @@ import com.xiaofei.springbootinit.example.commonserviceExec.model.dto.CommonServ
 import com.xiaofei.springbootinit.example.commonserviceExec.utils.ServiceUtils;
 import com.xiaofei.springbootinit.model.entity.User;
 import org.apache.poi.ss.formula.functions.T;
+import org.checkerframework.checker.units.qual.A;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,9 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/common/service")
 public class TestController {
 
+    @Autowired
+    private ServiceUtils serviceUtils;
+
     @PostMapping("/exec")
     public BaseResponse<T> commonExec(@RequestBody CommonServiceRequest request) {
-        return ServiceUtils.commonExec(request);
+        return serviceUtils.commonExec(request);
     }
 
     @PostMapping("/textExec")

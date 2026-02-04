@@ -11,6 +11,7 @@ import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -35,18 +36,19 @@ import java.util.concurrent.TimeoutException;
 public class ServiceUtils implements ApplicationContextAware {
 
 
+    private final ThreadPoolTaskExecutor applicationTaskExecutor;
+    private final TransactionTemplate transactionTemplate;
+    private ApplicationContext applicationContext;
+
     @Autowired
-    private static ThreadPoolTaskExecutor taskExecutor;
-
-
-    @Autowired
-    private static TransactionTemplate transactionTemplate;
-
-    private static ApplicationContext applicationContext;
+    public ServiceUtils(ThreadPoolTaskExecutor applicationTaskExecutor, TransactionTemplate transactionTemplate) {
+        this.applicationTaskExecutor = applicationTaskExecutor;
+        this.transactionTemplate = transactionTemplate;
+    }
 
     @Override
     public void setApplicationContext(ApplicationContext context) throws BeansException {
-        applicationContext = context;
+        this.applicationContext = context;
     }
 
     /**
@@ -56,7 +58,7 @@ public class ServiceUtils implements ApplicationContextAware {
      * @return 执行结果
      */
     @SuppressWarnings("unchecked")
-    public static <T> BaseResponse<T> commonExec(CommonServiceRequest<?> request) {
+    public <T> BaseResponse<T> commonExec(CommonServiceRequest<?> request) {
         return transactionTemplate.execute(status -> {
             try {
                 String serviceName = request.getServiceName();
@@ -94,7 +96,7 @@ public class ServiceUtils implements ApplicationContextAware {
         });
     }
 
-    public static void executeProcessors(List<ServiceProcessorConfig> configs, String timing,
+    public void executeProcessors(List<ServiceProcessorConfig> configs, String timing,
                                          String serviceName, String methodName,
                                          CommonServiceRequest<?> request,
                                          BaseResponse<?> response) {
@@ -134,7 +136,7 @@ public class ServiceUtils implements ApplicationContextAware {
                         }
                         log.error("Async processor execution error", e);
                     }
-                }, taskExecutor);
+                }, applicationTaskExecutor);
 
                 futures.add(future);
             } else {
