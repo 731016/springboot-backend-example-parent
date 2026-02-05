@@ -36,13 +36,13 @@ import java.util.concurrent.TimeoutException;
 public class ServiceUtils implements ApplicationContextAware {
 
 
-    private final ThreadPoolTaskExecutor applicationTaskExecutor;
+    private final ThreadPoolTaskExecutor defaultExecutor;
     private final TransactionTemplate transactionTemplate;
     private ApplicationContext applicationContext;
 
     @Autowired
-    public ServiceUtils(ThreadPoolTaskExecutor applicationTaskExecutor, TransactionTemplate transactionTemplate) {
-        this.applicationTaskExecutor = applicationTaskExecutor;
+    public ServiceUtils(ThreadPoolTaskExecutor defaultExecutor, TransactionTemplate transactionTemplate) {
+        this.defaultExecutor = defaultExecutor;
         this.transactionTemplate = transactionTemplate;
     }
 
@@ -136,7 +136,7 @@ public class ServiceUtils implements ApplicationContextAware {
                         }
                         log.error("Async processor execution error", e);
                     }
-                }, applicationTaskExecutor);
+                }, defaultExecutor);
 
                 futures.add(future);
             } else {

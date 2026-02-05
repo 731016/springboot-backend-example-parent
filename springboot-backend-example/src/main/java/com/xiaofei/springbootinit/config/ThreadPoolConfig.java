@@ -12,14 +12,18 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 public class ThreadPoolConfig {
 
-    @Bean
-    public ThreadPoolTaskExecutor taskExecutor() {
+    @Bean(value = "defaultExecutor")
+    public ThreadPoolTaskExecutor defaultExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(10); // 核心线程数
-        executor.setMaxPoolSize(20); // 最大线程数
-        executor.setQueueCapacity(200); // 队列容量
-        executor.setThreadNamePrefix("custom-executor-"); // 线程名前缀
-        executor.setKeepAliveSeconds(60);  // 空闲线程存活时间（秒）
+        // 核心线程数
+        executor.setCorePoolSize(100);
+        // 队列容量
+        executor.setQueueCapacity(1000000);
+        // 空闲线程存活时间（秒）
+        executor.setKeepAliveSeconds(60);
+        executor.setDaemon(true);
+        //设置关机时是否等待计划任务完成，不中断正在运行的任务并执行队列中的所有任务。
+        executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.initialize(); // 初始化
         return executor;
     }
