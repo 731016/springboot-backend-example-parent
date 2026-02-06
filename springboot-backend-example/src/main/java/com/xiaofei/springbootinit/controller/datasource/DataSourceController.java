@@ -1,4 +1,4 @@
-package com.xiaofei.springbootinit.example.datasource.controller;
+package com.xiaofei.springbootinit.controller.datasource;
 
 import com.xiaofei.springbootbackendcommon.common.BaseResponse;
 import com.xiaofei.springbootbackendcommon.common.ErrorCode;
