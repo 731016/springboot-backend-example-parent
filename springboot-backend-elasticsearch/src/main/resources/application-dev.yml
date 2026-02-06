@@ -62,7 +62,7 @@ server:
 knife4j:
   enable: true
   openapi:
-    title: "接口文档"
+    title: "elasticsearch接口文档"
     version: 1.0
     group:
       default:

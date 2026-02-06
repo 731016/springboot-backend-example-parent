@@ -137,7 +137,7 @@ cos:
 knife4j:
   enable: true
   openapi:
-    title: "接口文档"
+    title: "公共服务接口文档"
     version: 1.0
     group:
       default:

@@ -17,6 +17,7 @@
         <module>springboot-backend-fileupload</module>
         <module>springboot-backend-redis</module>
         <module>springboot-backend-elasticsearch</module>
+        <module>springboot-backend-websocket</module>
     </modules>
 
     <groupId>com.xiaofei</groupId>
