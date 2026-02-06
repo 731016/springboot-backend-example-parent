@@ -1,32 +1,32 @@
-package com.xiaofei.springbootbackendelasticsearch;
+package com.xiaofei.springbootbackendquartz;
 
+import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure;
 import com.binarywang.spring.starter.wxjava.mp.config.WxMpAutoConfiguration;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication(exclude = {WxMpAutoConfiguration.class})
+@SpringBootApplication(exclude = {WxMpAutoConfiguration.class, DataSourceAutoConfiguration.class, DruidDataSourceAutoConfigure.class})
 @ComponentScan(
         basePackages = {
-                "com.xiaofei.springbootbackendelasticsearch", // 自己
+                "com.xiaofei.springbootbackendquartz", // 自己
                 "com.xiaofei.springbootinit"              // 把 example 模块的包也扫进来
         }
 )
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
-@EnableScheduling
 @MapperScan({
-        "com.xiaofei.springbootbackendelasticsearch.mapper",
+        "com.xiaofei.springbootbackendquartz.mapper",
         "com.xiaofei.springbootinit.mapper",
         "com.xiaofei.springbootinit.example.commonserviceExec.mapper",
         "com.xiaofei.springbootinit.example.kafka.mapper"
 })
-public class ElasticsearchApplication {
+public class QuartzApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ElasticsearchApplication.class, args);
+        SpringApplication.run(QuartzApplication.class, args);
     }
 
 }

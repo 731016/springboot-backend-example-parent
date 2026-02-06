@@ -18,6 +18,7 @@
         <module>springboot-backend-redis</module>
         <module>springboot-backend-elasticsearch</module>
         <module>springboot-backend-websocket</module>
+        <module>springboot-backend-quartz</module>
     </modules>
 
     <groupId>com.xiaofei</groupId>
