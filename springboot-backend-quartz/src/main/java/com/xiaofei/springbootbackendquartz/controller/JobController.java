@@ -41,7 +41,7 @@ public class JobController {
      * 保存定时任务
      */
     @PostMapping("/addJob")
-    public BaseResponse<String> addJob(@Valid JobForm form) {
+    public BaseResponse<String> addJob(@Valid @RequestBody JobForm form) {
         try {
             jobService.addJob(form);
         } catch (Exception e) {
@@ -54,21 +54,30 @@ public class JobController {
     /**
      * 删除定时任务
      */
-    @DeleteMapping("/deleteJob")
-    public BaseResponse<String> deleteJob(JobForm form) throws SchedulerException {
+    @PostMapping("/deleteJob")
+    public BaseResponse<String> deleteJob(@RequestBody JobForm form) {
         if (StrUtil.hasBlank(form.getJobGroupName(), form.getJobClassName())) {
-            return ResultUtils.error(ErrorCode.PARAMS_ERROR);
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR, "任务组名和类名不能为空");
         }
 
-        jobService.deleteJob(form);
-        return ResultUtils.success("删除成功");
+        try {
+            boolean deleteJob = jobService.deleteJob(form);
+            if (deleteJob){
+                return ResultUtils.success("删除成功");
+            }else{
+                return ResultUtils.error(ErrorCode.SYSTEM_ERROR, "删除失败");
+            }
+        } catch (Exception e) {
+            log.error("删除定时任务失败", e);
+            return ResultUtils.error(ErrorCode.SYSTEM_ERROR, e.getMessage());
+        }
     }
 
     /**
      * 暂停定时任务
      */
     @PostMapping("/pause")
-    public BaseResponse<String> pauseJob(JobForm form) throws SchedulerException {
+    public BaseResponse<String> pauseJob(@RequestBody JobForm form) throws SchedulerException {
         if (StrUtil.hasBlank(form.getJobGroupName(), form.getJobClassName())) {
             return ResultUtils.error(ErrorCode.PARAMS_ERROR);
         }
@@ -81,7 +90,7 @@ public class JobController {
      * 恢复定时任务
      */
     @PostMapping("/resume")
-    public BaseResponse<String> resumeJob(JobForm form) throws SchedulerException {
+    public BaseResponse<String> resumeJob(@RequestBody JobForm form) throws SchedulerException {
         if (StrUtil.hasBlank(form.getJobGroupName(), form.getJobClassName())) {
             return ResultUtils.error(ErrorCode.PARAMS_ERROR);
         }
@@ -94,7 +103,7 @@ public class JobController {
      * 修改定时任务，定时时间
      */
     @PostMapping("/cron")
-    public BaseResponse<String> cronJob(@Valid JobForm form) {
+    public BaseResponse<String> cronJob(@Valid @RequestBody JobForm form) {
         try {
             jobService.cronJob(form);
         } catch (Exception e) {

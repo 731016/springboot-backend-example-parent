@@ -78,7 +78,7 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, JobAndTrigger> implem
      * @throws SchedulerException 异常
      */
     @Override
-    public void deleteJob(JobForm form) throws SchedulerException {
+    public boolean deleteJob(JobForm form) throws SchedulerException {
         TriggerKey triggerKey = TriggerKey.triggerKey(form.getJobClassName(), form.getJobGroupName());
         //暂停触发器
         scheduler.pauseTrigger(triggerKey);
@@ -87,7 +87,8 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, JobAndTrigger> implem
 
         JobKey jobKey = JobKey.jobKey(form.getJobClassName(), form.getJobGroupName());
         //删除任务
-        scheduler.deleteJob(jobKey);
+        boolean delJobFlag = scheduler.deleteJob(jobKey);
+        return delJobFlag;
     }
 
     /**

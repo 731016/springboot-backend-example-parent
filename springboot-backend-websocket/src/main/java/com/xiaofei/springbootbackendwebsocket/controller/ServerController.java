@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
  * @date Created in 2018-12-17 10:22
  */
 @RestController
-@RequestMapping("/server")
+@RequestMapping("/websocket")
 public class ServerController {
 
-    @GetMapping
+    @GetMapping("/server")
     public Dict serverInfo() throws Exception {
         Server server = new Server();
         server.copyTo();

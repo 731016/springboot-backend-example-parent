@@ -140,7 +140,7 @@
         },
         methods: {
             _getServerInfo() {
-                axios.get('/server')
+                axios.get('/websocket/server')
                     .then((response) => {
                         this.server = response.data
                     })

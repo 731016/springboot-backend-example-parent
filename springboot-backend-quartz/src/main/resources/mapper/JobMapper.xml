@@ -10,18 +10,24 @@
         SELECT job_details.JOB_NAME          as jobName,
                job_details.JOB_GROUP         as jobGroup,
                job_details.JOB_CLASS_NAME    as jobClassName,
-               cron_triggers .CRON_EXPRESSION as cronExpression,
+               cron_triggers.CRON_EXPRESSION as cronExpression,
                cron_triggers.TIME_ZONE_ID    as timeZoneId,
                qrtz_triggers.TRIGGER_NAME    as triggerName,
                qrtz_triggers.TRIGGER_GROUP   as triggerGroup,
-               qrtz_triggers.TRIGGER_STATE   as triggerState
+               qrtz_triggers.TRIGGER_STATE   as triggerState,
+               COALESCE(simple_triggers.REPEAT_INTERVAL, 0) as repeatInterval,
+               COALESCE(simple_triggers.TIMES_TRIGGERED, 0) as timesTriggered
         FROM QRTZ_JOB_DETAILS job_details
-                 LEFT JOIN QRTZ_CRON_TRIGGERS cron_triggers
-                           ON job_details.JOB_NAME = cron_triggers.TRIGGER_NAME
-                               AND job_details.JOB_GROUP = cron_triggers.TRIGGER_GROUP
                  LEFT JOIN QRTZ_TRIGGERS qrtz_triggers
-                           ON qrtz_triggers.TRIGGER_NAME = job_details.JOB_NAME
-                               AND qrtz_triggers.TRIGGER_GROUP = job_details.JOB_GROUP
+                           ON qrtz_triggers.JOB_NAME = job_details.JOB_NAME
+                               AND qrtz_triggers.JOB_GROUP = job_details.JOB_GROUP
+                 LEFT JOIN QRTZ_CRON_TRIGGERS cron_triggers
+                           ON cron_triggers.TRIGGER_NAME = qrtz_triggers.TRIGGER_NAME
+                               AND cron_triggers.TRIGGER_GROUP = qrtz_triggers.TRIGGER_GROUP
+                 LEFT JOIN QRTZ_SIMPLE_TRIGGERS simple_triggers
+                           ON simple_triggers.TRIGGER_NAME = qrtz_triggers.TRIGGER_NAME
+                               AND simple_triggers.TRIGGER_GROUP = qrtz_triggers.TRIGGER_GROUP
+        ORDER BY job_details.JOB_NAME, job_details.JOB_GROUP
     </select>
     
     <select id="selectQrtzCronTriggers" resultType="com.xiaofei.springbootbackendquartz.model.entity.JobAndTrigger" parameterMap="jobAndTrigger">
