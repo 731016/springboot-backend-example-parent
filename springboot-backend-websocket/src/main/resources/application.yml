@@ -3,7 +3,7 @@
 # @from
 spring:
   application:
-    name: springboot-backend-redis
+    name: springboot-backend-websocket
   # 默认 dev 环境
   profiles:
     active: @spring.profiles.active@

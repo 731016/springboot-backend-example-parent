@@ -20,8 +20,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @MapperScan({
         "com.xiaofei.springbootbackendquartz.mapper",
         "com.xiaofei.springbootinit.mapper",
-        "com.xiaofei.springbootinit.example.commonserviceExec.mapper",
-        "com.xiaofei.springbootinit.example.kafka.mapper"
+        "com.xiaofei.springbootinit.example.commonserviceExec.mapper"
 })
 public class QuartzApplication {
 

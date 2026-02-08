@@ -3,7 +3,7 @@
 # @from
 spring:
   application:
-    name: springboot-backend-elasticsearch
+    name: springboot-backend-kafka
   # 默认 dev 环境
   profiles:
     active: @spring.profiles.active@

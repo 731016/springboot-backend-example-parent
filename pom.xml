@@ -19,6 +19,7 @@
         <module>springboot-backend-elasticsearch</module>
         <module>springboot-backend-websocket</module>
         <module>springboot-backend-quartz</module>
+        <module>springboot-backend-kafka</module>
     </modules>
 
     <groupId>com.xiaofei</groupId>

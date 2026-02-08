@@ -18,34 +18,6 @@ spring:
       #    url: jdbc:mysql://localhost:3306/my_db
       #    username: root
       #    password: root
-  kafka:
-    bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
-    producer:
-      retries: 3
-      batch-size: 16384
-      buffer-memory: 33554432
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-    consumer:
-      group-id: spring-boot-init
-      # 手动提交
-      enable-auto-commit: false
-      auto-offset-reset: latest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      properties:
-        session.timeout.ms: 60000
-    listener:
-      log-container-config: false
-      concurrency: 5
-      # 手动提交
-      ack-mode: manual_immediate
-  # Elasticsearch 配置
-  # todo 需替换配置，然后取消注释
-  #  elasticsearch:
-  #    uris: http://localhost:9200
-  #    username: root
-  #    password: 123456
   # Redis 配置
   # todo 需替换配置，然后取消注释
   redis:
