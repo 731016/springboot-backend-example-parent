@@ -10,6 +10,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
@@ -32,7 +33,7 @@ public class MessageHandler {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
-//    @KafkaListener(topics = KafkaConstants.TOPIC_TEST, containerFactory = "ackContainerFactory")
+    @KafkaListener(topics = KafkaConstants.TOPIC_TEST, containerFactory = "ackContainerFactory")
     public void handleMessage(ConsumerRecords<String, String> records, Acknowledgment acknowledgment) {
         Iterator<ConsumerRecord<String, String>> iterator = records.iterator();
         while (iterator.hasNext()) {

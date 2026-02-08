@@ -5,6 +5,7 @@ import com.xiaofei.springbootbackendkafka.constants.KafkaConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +22,7 @@ import java.util.Map;
 @Slf4j
 public class DataProcessDlqService {
 
-//    @KafkaListener(topics = KafkaConstants.RAW_DATA_TOPIC_DLQ, groupId = KafkaConstants.RAW_DATA_GROUP_ID, containerFactory = "ackContainerFactory")
+    @KafkaListener(topics = KafkaConstants.RAW_DATA_TOPIC_DLQ, groupId = KafkaConstants.RAW_DATA_GROUP_ID, containerFactory = "ackContainerFactory")
     public void processData(ConsumerRecords<String, String> records, Acknowledgment acknowledgment) {
         Iterator<ConsumerRecord<String, String>> iterator = records.iterator();
         while (iterator.hasNext()) {

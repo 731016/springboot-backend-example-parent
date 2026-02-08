@@ -13,6 +13,7 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
@@ -22,7 +23,8 @@ import javax.validation.Valid;
  * @description TODO
  * @date 2024/12/26
  */
-@RestController("/kafka/kafkaMessage")
+@RestController
+@RequestMapping("/kafka/kafkaMessage")
 @Slf4j
 public class KafKaController {
 

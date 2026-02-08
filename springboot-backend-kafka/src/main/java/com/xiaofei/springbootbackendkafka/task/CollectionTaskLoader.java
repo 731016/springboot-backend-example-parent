@@ -22,8 +22,8 @@ public class CollectionTaskLoader implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         try {
-//            dataCollectionService.startAllCollectTasks();
-//            log.info("采集任务启动成功");
+            dataCollectionService.startAllCollectTasks();
+            log.info("采集任务启动成功");
         } catch (Exception e) {
             log.error("启动采集任务失败", e);
         }

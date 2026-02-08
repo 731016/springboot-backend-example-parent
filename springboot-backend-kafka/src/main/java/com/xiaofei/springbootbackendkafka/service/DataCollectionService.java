@@ -10,11 +10,13 @@ import com.xiaofei.springbootbackendkafka.model.entity.PointConfig;
 import com.xiaofei.springbootbackendkafka.model.vo.TaskStatusVO;
 import com.xiaofei.springbootbackendkafka.task.CollDataTask;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -129,6 +131,9 @@ public class DataCollectionService {
         // 保存任务引用
         collectionTasks.put(pointCode, future);
 
+        //点位启用
+        pointConfigMapper.updatePointsStatus(Arrays.asList(pointCode),1);
+
         // 更新运行状态
         pointConfigMapper.updateRunningStatus(pointCode, 1);
 
@@ -189,10 +194,12 @@ public class DataCollectionService {
 
         try {
             String result = collDataTask.call();
-            // 将结果转换为 JSON 字符串
-            kafkaTemplate.send(KafkaConstants.RAW_DATA_TOPIC, config.getPointCode(), JSONUtil.toJsonStr(result));
-            // 成功后重置重试次数
-            collDataTask.resetRetryCount();
+            if (StringUtils.isNotEmpty(result)){
+                // 将结果转换为 JSON 字符串
+                kafkaTemplate.send(KafkaConstants.RAW_DATA_TOPIC, config.getPointCode(), JSONUtil.toJsonStr(result));
+                // 成功后重置重试次数
+                collDataTask.resetRetryCount();
+            }
         } catch (Exception e) {
             // 增加重试等待时间并抛出异常
             collDataTask.incrementRetryCount();

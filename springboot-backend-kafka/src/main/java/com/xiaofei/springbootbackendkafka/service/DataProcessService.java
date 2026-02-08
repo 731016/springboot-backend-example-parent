@@ -17,6 +17,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
@@ -48,7 +49,7 @@ public class DataProcessService {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
-//    @KafkaListener(topics = KafkaConstants.RAW_DATA_TOPIC, groupId = KafkaConstants.RAW_DATA_GROUP_ID, containerFactory = "ackContainerFactory")
+    @KafkaListener(topics = KafkaConstants.RAW_DATA_TOPIC, groupId = KafkaConstants.RAW_DATA_GROUP_ID, containerFactory = "ackContainerFactory")
     public void processData(ConsumerRecords<String, String> records, Acknowledgment acknowledgment) {
         Iterator<ConsumerRecord<String, String>> iterator = records.iterator();
         while (iterator.hasNext()) {

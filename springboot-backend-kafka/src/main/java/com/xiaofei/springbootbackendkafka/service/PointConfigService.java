@@ -3,6 +3,8 @@ package com.xiaofei.springbootbackendkafka.service;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.http.Method;
+import cn.hutool.json.JSONUtil;
 import com.xiaofei.springbootbackendcommon.common.ErrorCode;
 import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import com.xiaofei.springbootbackendkafka.mapper.PointConfigMapper;
@@ -67,12 +69,14 @@ public class PointConfigService {
         // 5. 如果URL不为空，验证连接
         if (StrUtil.isNotBlank(request.getValidUrl())) {
             try {
-                boolean isValid = testConnection(request.getValidUrl());
+                boolean isValid = testConnection(request.getDataUrl());
                 if (!isValid) {
                     log.warn("点位验证URL连接失败: {}", request.getValidUrl());
+                    throw new BusinessException(ErrorCode.OPERATION_ERROR, String.format("点位验证URL连接失败: {%s}", request.getDataUrl()));
                 }
             } catch (Exception e) {
                 log.error("验证URL连接异常: {}", request.getValidUrl(), e);
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, String.format("验证URL连接异常: {%s}", request.getDataUrl()));
             }
         }
 
@@ -84,9 +88,10 @@ public class PointConfigService {
      */
     private boolean testConnection(String url) {
         try {
-            HttpResponse response = HttpUtil.createPost(url)
-                    .setConnectionTimeout(3000)
-                    .setReadTimeout(3000)
+            HttpResponse response = HttpUtil.createRequest(Method.POST, url)
+                    .header("Content-Type", "application/json")
+                    .setConnectionTimeout(5000)
+                    .setReadTimeout(5000)
                     .execute();
             return response.isOk();
         } catch (Exception e) {

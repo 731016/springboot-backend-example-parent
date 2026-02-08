@@ -5,6 +5,7 @@ import com.xiaofei.springbootbackendkafka.constants.KafkaConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +22,7 @@ import java.util.Map;
 @Slf4j
 public class DLQMessageHandler {
 
-//    @KafkaListener(topics = KafkaConstants.TOPIC_DLQ, containerFactory = "ackContainerFactory")
+    @KafkaListener(topics = KafkaConstants.TOPIC_DLQ, containerFactory = "ackContainerFactory")
     public void handleDLQMessage(ConsumerRecords<String, String> records, Acknowledgment acknowledgment) {
         Iterator<ConsumerRecord<String, String>> iterator = records.iterator();
         while (iterator.hasNext()) {
