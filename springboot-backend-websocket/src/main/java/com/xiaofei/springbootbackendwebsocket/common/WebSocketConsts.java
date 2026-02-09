@@ -10,4 +10,5 @@ package com.xiaofei.springbootbackendwebsocket.common;
  */
 public interface WebSocketConsts {
     String PUSH_SERVER = "/topic/server";
+    String PUSH_KAFKA_DATA = "/topic/kafka/data";
 }

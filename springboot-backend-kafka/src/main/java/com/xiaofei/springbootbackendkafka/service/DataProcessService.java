@@ -9,6 +9,7 @@ import com.xiaofei.springbootbackendkafka.mapper.DataStatisticsMapper;
 import com.xiaofei.springbootbackendkafka.model.dto.CollectedData;
 import com.xiaofei.springbootbackendkafka.model.entity.DataDetail;
 import com.xiaofei.springbootbackendkafka.model.entity.DataStatistics;
+import com.xiaofei.springbootbackendwebsocket.common.WebSocketConsts;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -48,6 +50,9 @@ public class DataProcessService {
 
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
+
+    @Autowired(required = false)
+    private SimpMessagingTemplate wsTemplate;
 
     @KafkaListener(topics = KafkaConstants.RAW_DATA_TOPIC, groupId = KafkaConstants.RAW_DATA_GROUP_ID, containerFactory = "ackContainerFactory")
     public void processData(ConsumerRecords<String, String> records, Acknowledgment acknowledgment) {
@@ -113,6 +118,16 @@ public class DataProcessService {
 
             detail.setStatisticsId(newDataStatistics.getId());
             dataDetailMapper.insert(detail);
+        }
+
+        // 通过 WebSocket 推送实时数据
+        if (wsTemplate != null) {
+            try {
+                wsTemplate.convertAndSend(WebSocketConsts.PUSH_KAFKA_DATA, detail);
+                log.info("已推送实时数据到 WebSocket: pointCode={}, value={}", detail.getPointCode(), detail.getValue());
+            } catch (Exception e) {
+                log.warn("推送 WebSocket 消息失败", e);
+            }
         }
     }
 
