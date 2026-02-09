@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,19 +22,19 @@ public interface PointConfigMapper extends BaseMapper<PointConfig> {
     /**
      * 获取主点位配置
      */
-    @Select("SELECT * FROM point_config WHERE isMainPoint = 1 AND status = 1 AND isDeleted = 0 LIMIT 1")
+    @Select("SELECT * FROM point_config WHERE isMainPoint = 1 AND status = 1 LIMIT 1")
     PointConfig getMainPoint();
 
     /**
      * 获取所有启用的点位配置
      */
-    @Select("SELECT * FROM point_config WHERE status = 1 AND isDeleted = 0")
+    @Select("SELECT * FROM point_config WHERE status = 1")
     List<PointConfig> getAllEnabledPoints();
 
     /**
      * 根据点位编码获取配置
      */
-    @Select("SELECT * FROM point_config WHERE pointCode = #{pointCode} AND isDeleted = 0")
+    @Select("SELECT * FROM point_config WHERE pointCode = #{pointCode}")
     PointConfig getByPointCode(@Param("pointCode") String pointCode);
 
     /**
@@ -45,7 +46,6 @@ public interface PointConfigMapper extends BaseMapper<PointConfig> {
             "<foreach collection='pointCodes' item='code' open='(' separator=',' close=')'>" +
             "#{code}" +
             "</foreach>" +
-            " AND isDeleted = 0" +
             "</script>")
     int updatePointsStatus(@Param("pointCodes") List<String> pointCodes, @Param("status") Integer status);
 
@@ -54,6 +54,14 @@ public interface PointConfigMapper extends BaseMapper<PointConfig> {
      * 更新运行状态
      */
     @Update("UPDATE point_config SET runningStatus = #{status} " +
-            "WHERE pointCode = #{pointCode} AND isDeleted = 0")
+            "WHERE pointCode = #{pointCode}")
     int updateRunningStatus(@Param("pointCode") String pointCode, @Param("status") Integer status);
+
+    /**
+     * 当前点位的最后移除运行时间
+     * @param pointCode
+     * @return
+     */
+    @Select("select collectTime from data_detail where pointCode = #{pointCode} order by collectTime desc limit 1")
+    Date getLastCollectTime(@Param("pointCode") String pointCode);
 }

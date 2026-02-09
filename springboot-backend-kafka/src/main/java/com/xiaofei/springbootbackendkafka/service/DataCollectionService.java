@@ -1,11 +1,16 @@
 package com.xiaofei.springbootbackendkafka.service;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
 import com.xiaofei.springbootbackendcommon.common.ErrorCode;
 import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import com.xiaofei.springbootbackendkafka.constants.KafkaConstants;
+import com.xiaofei.springbootbackendkafka.mapper.DataDetailMapper;
+import com.xiaofei.springbootbackendkafka.mapper.DataStatisticsMapper;
 import com.xiaofei.springbootbackendkafka.mapper.PointConfigMapper;
+import com.xiaofei.springbootbackendkafka.model.entity.DataDetail;
+import com.xiaofei.springbootbackendkafka.model.entity.DataStatistics;
 import com.xiaofei.springbootbackendkafka.model.entity.PointConfig;
 import com.xiaofei.springbootbackendkafka.model.vo.TaskStatusVO;
 import com.xiaofei.springbootbackendkafka.task.CollDataTask;
@@ -34,6 +39,12 @@ public class DataCollectionService {
 
     @Autowired
     private PointConfigMapper pointConfigMapper;
+
+    @Autowired
+    private DataDetailMapper dataDetailMapper;
+
+    @Autowired
+    private DataStatisticsMapper dataStatisticsMapper;
 
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -132,7 +143,7 @@ public class DataCollectionService {
         collectionTasks.put(pointCode, future);
 
         //点位启用
-        pointConfigMapper.updatePointsStatus(Arrays.asList(pointCode),1);
+        pointConfigMapper.updatePointsStatus(Arrays.asList(pointCode), 1);
 
         // 更新运行状态
         pointConfigMapper.updateRunningStatus(pointCode, 1);
@@ -161,12 +172,13 @@ public class DataCollectionService {
         if (config == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "点位配置不存在");
         }
-
+        Date lastCollectTime = getLastCollectTime(pointCode);
         return TaskStatusVO.builder()
                 .pointCode(pointCode)
                 .pointName(config.getPointName())
                 .running(collectionTasks.containsKey(pointCode))
                 .lastCollectTime(getLastCollectTime(pointCode))
+                .nextCollectTime(DateUtil.offsetSecond(lastCollectTime,config.getIntervalSeconds()))
                 .build();
     }
 
@@ -176,12 +188,17 @@ public class DataCollectionService {
     public List<TaskStatusVO> getAllCollectionStatus() {
         List<PointConfig> configs = pointConfigMapper.getAllEnabledPoints();
         return configs.stream()
-                .map(config -> TaskStatusVO.builder()
-                        .pointCode(config.getPointCode())
-                        .pointName(config.getPointName())
-                        .running(collectionTasks.containsKey(config.getPointCode()))
-                        .lastCollectTime(getLastCollectTime(config.getPointCode()))
-                        .build())
+                .map(config -> {
+                    Date lastCollectTime = getLastCollectTime(config.getPointCode());
+                    Integer intervalSeconds = config.getIntervalSeconds();
+                    return TaskStatusVO.builder()
+                            .pointCode(config.getPointCode())
+                            .pointName(config.getPointName())
+                            .running(collectionTasks.containsKey(config.getPointCode()))
+                            .lastCollectTime(lastCollectTime)
+                            .nextCollectTime(DateUtil.offsetSecond(lastCollectTime, intervalSeconds))
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 
@@ -194,7 +211,7 @@ public class DataCollectionService {
 
         try {
             String result = collDataTask.call();
-            if (StringUtils.isNotEmpty(result)){
+            if (StringUtils.isNotEmpty(result)) {
                 // 将结果转换为 JSON 字符串
                 kafkaTemplate.send(KafkaConstants.RAW_DATA_TOPIC, config.getPointCode(), JSONUtil.toJsonStr(result));
                 // 成功后重置重试次数
@@ -209,7 +226,34 @@ public class DataCollectionService {
 
     private Date getLastCollectTime(String pointCode) {
         // 从数据明细表获取最后采集时间
-        return null; // TODO: 实现此方法
+        Date lastCollectTime = pointConfigMapper.getLastCollectTime(pointCode);
+        return lastCollectTime;
+    }
+
+    /**
+     * 根据点位编码查询采集数据
+     *
+     * @param pointCode 点位编码
+     * @return 采集数据列表
+     */
+    public List<DataDetail> getDataDetailsByPointCode(String pointCode) {
+        if (StringUtils.isBlank(pointCode)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "点位编码不能为空");
+        }
+        return dataDetailMapper.getDetailsByPointCode(pointCode);
+    }
+
+    /**
+     * 根据点位编码查询统计数据
+     *
+     * @param pointCode 点位编码
+     * @return 统计数据列表
+     */
+    public List<DataStatistics> getDataStatisticsByPointCode(String pointCode) {
+        if (StringUtils.isBlank(pointCode)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "点位编码不能为空");
+        }
+        return dataStatisticsMapper.getStatisticsByPointCode(pointCode);
     }
 
     @PreDestroy

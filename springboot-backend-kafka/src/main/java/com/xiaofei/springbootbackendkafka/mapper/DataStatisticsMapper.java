@@ -22,7 +22,7 @@ public interface DataStatisticsMapper extends BaseMapper<DataStatistics> {
     /**
      * 获取进行中的统计记录
      */
-    @Select("SELECT * FROM data_statistics WHERE pointCode = #{pointCode} AND status = 1 AND isDeleted = 0")
+    @Select("SELECT * FROM data_statistics WHERE pointCode = #{pointCode} AND status = 1")
     DataStatistics getActiveStatistics(@Param("pointCode") String pointCode);
 
     /**
@@ -33,7 +33,7 @@ public interface DataStatisticsMapper extends BaseMapper<DataStatistics> {
             "minValue = #{minValue}, " +
             "avgValue = #{avgValue}, " +
             "updateTime = NOW() " +
-            "WHERE id = #{id} AND isDeleted = 0")
+            "WHERE id = #{id}")
     int updateStatisticsValues(@Param("id") Long id,
                                @Param("maxValue") BigDecimal maxValue,
                                @Param("minValue") BigDecimal minValue,
@@ -46,7 +46,7 @@ public interface DataStatisticsMapper extends BaseMapper<DataStatistics> {
             "status = 2, " +
             "endTime = #{endTime}, " +
             "updateTime = NOW() " +
-            "WHERE id = #{id} AND isDeleted = 0")
+            "WHERE id = #{id}")
     int completeStatistics(@Param("id") Long id, @Param("endTime") Date endTime);
 
     /**
@@ -56,10 +56,15 @@ public interface DataStatisticsMapper extends BaseMapper<DataStatistics> {
             "WHERE pointCode = #{pointCode} " +
             "AND startTime >= #{startTime} " +
             "AND startTime <= #{endTime} " +
-            "AND isDeleted = 0 " +
             "ORDER BY startTime DESC")
     List<DataStatistics> getStatisticsByTimeRange(@Param("pointCode") String pointCode,
                                                   @Param("startTime") Date startTime,
                                                   @Param("endTime") Date endTime);
+
+    /**
+     * 根据点位编码查询统计数据
+     */
+    @Select("SELECT * FROM data_statistics WHERE pointCode = #{pointCode}")
+    List<DataStatistics> getStatisticsByPointCode(@Param("pointCode") String pointCode);
 
 }

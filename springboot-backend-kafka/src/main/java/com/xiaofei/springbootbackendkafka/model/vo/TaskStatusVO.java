@@ -1,5 +1,6 @@
 package com.xiaofei.springbootbackendkafka.model.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,5 +38,12 @@ public class TaskStatusVO {
     /**
      * 最后采集时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date lastCollectTime;
+
+    /**
+     * 下次采集时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date nextCollectTime;
 }

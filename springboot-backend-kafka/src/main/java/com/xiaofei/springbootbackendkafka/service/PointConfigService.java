@@ -4,13 +4,17 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.http.Method;
-import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xiaofei.springbootbackendcommon.common.ErrorCode;
+import com.xiaofei.springbootbackendcommon.constant.CommonConstant;
 import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import com.xiaofei.springbootbackendkafka.mapper.PointConfigMapper;
 import com.xiaofei.springbootbackendkafka.model.dto.AddPointConfigRequest;
+import com.xiaofei.springbootbackendkafka.model.dto.PointConfigQueryRequest;
 import com.xiaofei.springbootbackendkafka.model.entity.PointConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,5 +102,58 @@ public class PointConfigService {
             log.error("连接测试失败: {}", url, e);
             return false;
         }
+    }
+
+    /**
+     * 分页查询采集点配置
+     *
+     * @param queryRequest 查询请求
+     * @return 分页结果
+     */
+    public Page<PointConfig> listPointConfigByPage(PointConfigQueryRequest queryRequest) {
+        if (queryRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        }
+        long current = queryRequest.getCurrent();
+        long size = queryRequest.getPageSize();
+        QueryWrapper<PointConfig> queryWrapper = getQueryWrapper(queryRequest);
+        return pointConfigMapper.selectPage(new Page<>(current, size), queryWrapper);
+    }
+
+    /**
+     * 获取查询条件
+     *
+     * @param queryRequest 查询请求
+     * @return 查询条件包装器
+     */
+    public QueryWrapper<PointConfig> getQueryWrapper(PointConfigQueryRequest queryRequest) {
+        if (queryRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        }
+        String pointCode = queryRequest.getPointCode();
+        String pointName = queryRequest.getPointName();
+        Integer intervalSeconds = queryRequest.getIntervalSeconds();
+        Integer isMainPoint = queryRequest.getIsMainPoint();
+        Integer status = queryRequest.getStatus();
+        String sortField = queryRequest.getSortField();
+        String sortOrder = queryRequest.getSortOrder();
+
+        QueryWrapper<PointConfig> queryWrapper = new QueryWrapper<>();
+        // 模糊查询
+        queryWrapper.like(StringUtils.isNotBlank(pointCode), "pointCode", pointCode);
+        queryWrapper.like(StringUtils.isNotBlank(pointName), "pointName", pointName);
+        // 精确查询
+        queryWrapper.eq(intervalSeconds != null, "intervalSeconds", intervalSeconds);
+        queryWrapper.eq(isMainPoint != null, "isMainPoint", isMainPoint);
+        queryWrapper.eq(status != null, "status", status);
+        // 排序
+        if (StringUtils.isNotBlank(sortField)) {
+            boolean isAsc = CommonConstant.SORT_ORDER_ASC.equals(sortOrder);
+            queryWrapper.orderBy(true, isAsc, sortField);
+        } else {
+            // 默认按创建时间倒序
+            queryWrapper.orderByDesc("createTime");
+        }
+        return queryWrapper;
     }
 }

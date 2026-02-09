@@ -1,10 +1,13 @@
 package com.xiaofei.springbootbackendkafka.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xiaofei.springbootbackendcommon.common.BaseResponse;
 import com.xiaofei.springbootbackendcommon.common.ErrorCode;
 import com.xiaofei.springbootbackendcommon.common.ResultUtils;
 import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import com.xiaofei.springbootbackendkafka.model.dto.AddPointConfigRequest;
+import com.xiaofei.springbootbackendkafka.model.dto.PointConfigQueryRequest;
+import com.xiaofei.springbootbackendkafka.model.entity.PointConfig;
 import com.xiaofei.springbootbackendkafka.service.PointConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,5 +45,20 @@ public class PointConfigController {
 
         long pointId = pointConfigService.addPointConfig(request);
         return ResultUtils.success(pointId);
+    }
+
+    /**
+     * 分页查询采集点配置
+     *
+     * @param queryRequest 查询请求
+     * @return 分页结果
+     */
+    @PostMapping("/point/list/page")
+    public BaseResponse<Page<PointConfig>> listPointConfigByPage(@RequestBody PointConfigQueryRequest queryRequest) {
+        if (queryRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        }
+        Page<PointConfig> pointConfigPage = pointConfigService.listPointConfigByPage(queryRequest);
+        return ResultUtils.success(pointConfigPage);
     }
 }
