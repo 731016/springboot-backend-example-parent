@@ -12,6 +12,7 @@ import com.xiaofei.springbootbackendwebsocket.utils.ServerUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +29,9 @@ public class ServerTask {
 
     @Autowired
     private SimpMessagingTemplate wsTemplate;
+
+    @Autowired(required = false)
+    private SimpUserRegistry simpUserRegistry;
 
 //    /**
 //     * 想启动该定时任务，需要调用接口/api/job/addJob，参数【cronExpression：0/8 * * * * ?，jobClassName：com.xiaofei.springbootinit.example.websocket.task.ServerTask，jobGroupName：websocket】
@@ -59,6 +63,12 @@ public class ServerTask {
     @Scheduled(cron = "0/8 * * * * ?")
     public void pushServerInfo() {   // 没有任何参数
         try {
+            // 如果还没有任何 WebSocket 连接，则不推送数据，避免无效推送
+            if (simpUserRegistry == null || simpUserRegistry.getUserCount() == 0) {
+                log.debug("【推送消息】当前没有 WebSocket 连接，跳过本次推送");
+                return;
+            }
+
             log.info("【推送消息】开始执行：{}", DateUtil.formatDateTime(new Date()));
             Server server = new Server();
             server.copyTo();
@@ -66,6 +76,7 @@ public class ServerTask {
             Dict dict = ServerUtil.wrapServerDict(serverVO);
             String jsonStr = JSONUtil.toJsonStr(dict);
             log.info(jsonStr);
+
             wsTemplate.convertAndSend(WebSocketConsts.PUSH_SERVER, jsonStr);
             log.info("【推送消息】执行结束：{}", DateUtil.formatDateTime(new Date()));
         } catch (Exception e) {
