@@ -15,6 +15,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
 import java.util.Date;
 
 @Service
@@ -91,7 +92,20 @@ public class WorkCalendarService {
         String sortField = queryRequest.getSortField();
         String sortOrder = queryRequest.getSortOrder();
 
-        queryWrapper.eq(workDate != null, "workDate", workDate);
+        // 工作日期只按「年月日」过滤，不比较时分秒
+        if (workDate != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(workDate);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            Date dayStart = cal.getTime();
+            cal.add(Calendar.DAY_OF_MONTH, 1);
+            Date nextDayStart = cal.getTime();
+            queryWrapper.ge("workDate", dayStart);
+            queryWrapper.lt("workDate", nextDayStart);
+        }
         queryWrapper.like(StringUtils.isNotBlank(shiftCode), "shiftCode", shiftCode);
         queryWrapper.like(StringUtils.isNotBlank(shiftName), "shiftName", shiftName);
         queryWrapper.eq(status != null, "status", status);

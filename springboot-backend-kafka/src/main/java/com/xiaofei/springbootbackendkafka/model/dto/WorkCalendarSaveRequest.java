@@ -1,6 +1,8 @@
 package com.xiaofei.springbootbackendkafka.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -29,9 +31,13 @@ public class WorkCalendarSaveRequest implements Serializable {
     private String shiftName;
 
     @NotNull(message = "班次开始时间不能为空")
+    @DateTimeFormat(pattern = "HH:mm:ss")
+    @JsonFormat(pattern = "HH:mm:ss", timezone = "GMT+8")
     private Date shiftStartTime;
 
     @NotNull(message = "班次结束时间不能为空")
+    @DateTimeFormat(pattern = "HH:mm:ss")
+    @JsonFormat(pattern = "HH:mm:ss", timezone = "GMT+8")
     private Date shiftEndTime;
 
     /**
