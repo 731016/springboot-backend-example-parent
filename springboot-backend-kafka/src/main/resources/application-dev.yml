@@ -50,6 +50,14 @@ spring:
       concurrency: 5
       # 手动提交
       ack-mode: manual_immediate
+# 本应用 Kafka 消费者扩展配置（详见 docs/KafkaConsumerDesign.md）
+app:
+  kafka:
+    # 消费者并发数（建议 ≤ topic 分区数；多实例时总消费者数 = 实例数 × 此值，且总消费者数不宜超过分区数）
+    consumer-concurrency: 3
+    raw-data:
+      # raw-data 消费组 ID；新增消费点位时可配置为不同 groupId，同一 topic 多组独立消费
+      group-id: raw-data-process-group
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false

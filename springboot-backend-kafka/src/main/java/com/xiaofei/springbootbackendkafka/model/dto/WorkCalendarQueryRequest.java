@@ -29,6 +29,16 @@ public class WorkCalendarQueryRequest implements Serializable {
     private Date workDate;
 
     /**
+     * 工作日期范围-开始（与 workDate 二选一，用于日历按月拉取）
+     */
+    private Date workDateStart;
+
+    /**
+     * 工作日期范围-结束（与 workDate 二选一，用于日历按月拉取）
+     */
+    private Date workDateEnd;
+
+    /**
      * 班次编码
      */
     private String shiftCode;

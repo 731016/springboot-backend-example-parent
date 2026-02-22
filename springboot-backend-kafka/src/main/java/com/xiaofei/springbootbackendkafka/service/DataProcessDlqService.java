@@ -22,7 +22,7 @@ import java.util.Map;
 @Slf4j
 public class DataProcessDlqService {
 
-    @KafkaListener(topics = KafkaConstants.RAW_DATA_TOPIC_DLQ, groupId = KafkaConstants.RAW_DATA_GROUP_ID, containerFactory = "ackContainerFactory")
+    @KafkaListener(topics = KafkaConstants.RAW_DATA_TOPIC_DLQ, groupId = "${app.kafka.raw-data.group-id:raw-data-process-group}", containerFactory = "ackContainerFactory")
     public void processData(ConsumerRecords<String, String> records, Acknowledgment acknowledgment) {
         Iterator<ConsumerRecord<String, String>> iterator = records.iterator();
         while (iterator.hasNext()) {

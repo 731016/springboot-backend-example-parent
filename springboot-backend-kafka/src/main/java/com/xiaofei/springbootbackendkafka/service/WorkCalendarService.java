@@ -86,6 +86,8 @@ public class WorkCalendarService {
         QueryWrapper<WorkCalendar> queryWrapper = new QueryWrapper<>();
 
         Date workDate = queryRequest.getWorkDate();
+        Date workDateStart = queryRequest.getWorkDateStart();
+        Date workDateEnd = queryRequest.getWorkDateEnd();
         String shiftCode = queryRequest.getShiftCode();
         String shiftName = queryRequest.getShiftName();
         Integer status = queryRequest.getStatus();
@@ -105,6 +107,25 @@ public class WorkCalendarService {
             Date nextDayStart = cal.getTime();
             queryWrapper.ge("workDate", dayStart);
             queryWrapper.lt("workDate", nextDayStart);
+        } else if (workDateStart != null || workDateEnd != null) {
+            if (workDateStart != null) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(workDateStart);
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                queryWrapper.ge("workDate", cal.getTime());
+            }
+            if (workDateEnd != null) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(workDateEnd);
+                cal.set(Calendar.HOUR_OF_DAY, 23);
+                cal.set(Calendar.MINUTE, 59);
+                cal.set(Calendar.SECOND, 59);
+                cal.set(Calendar.MILLISECOND, 999);
+                queryWrapper.le("workDate", cal.getTime());
+            }
         }
         queryWrapper.like(StringUtils.isNotBlank(shiftCode), "shiftCode", shiftCode);
         queryWrapper.like(StringUtils.isNotBlank(shiftName), "shiftName", shiftName);

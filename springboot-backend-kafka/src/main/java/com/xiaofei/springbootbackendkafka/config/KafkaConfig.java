@@ -1,7 +1,8 @@
 package com.xiaofei.springbootbackendkafka.config;
 
-import com.xiaofei.springbootbackendkafka.constants.KafkaConstants;
-import lombok.AllArgsConstructor;
+import org.apache.kafka.clients.admin.AdminClient;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -11,18 +12,27 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.ContainerProperties;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * @author tuaofei
- * @description TODO
- * @date 2024/12/26
+ * Kafka 配置。消费者并发数可通过 app.kafka.consumer-concurrency 配置，便于扩展（见 docs/KafkaConsumerDesign.md）。
  */
 @Configuration
 @EnableConfigurationProperties({KafkaProperties.class})
 @EnableKafka
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class KafkaConfig {
 
     private final KafkaProperties kafkaProperties;
+
+    /** 消费者并发数，建议 ≤ topic 分区数；缺省 3 */
+    private int consumerConcurrency = 3;
+
+    @Value("${app.kafka.consumer-concurrency:3}")
+    public void setConsumerConcurrency(int consumerConcurrency) {
+        this.consumerConcurrency = consumerConcurrency;
+    }
 
     @Bean
     public KafkaTemplate<String, String> kafkaTemplate() {
@@ -38,7 +48,7 @@ public class KafkaConfig {
     public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
-        factory.setConcurrency(KafkaConstants.DEFAULT_PARTITION_NUM);
+        factory.setConcurrency(consumerConcurrency);
         factory.setBatchListener(true);
         factory.getContainerProperties().setPollTimeout(3000);
         return factory;
@@ -55,10 +65,14 @@ public class KafkaConfig {
         factory.setConsumerFactory(consumerFactory());
         factory.setBatchListener(true);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
-        factory.setConcurrency(KafkaConstants.DEFAULT_PARTITION_NUM);
+        factory.setConcurrency(consumerConcurrency);
         return factory;
     }
 
-
-
+    /** 用于查看 topic、消费者组、分区与 lag 等运行情况 */
+    @Bean
+    public AdminClient kafkaAdminClient() {
+        Map<String, Object> config = new HashMap<>(kafkaProperties.buildConsumerProperties());
+        return AdminClient.create(config);
+    }
 }

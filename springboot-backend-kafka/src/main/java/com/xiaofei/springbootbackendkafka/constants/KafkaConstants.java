@@ -43,5 +43,8 @@ public interface KafkaConstants {
     String RAW_DATA_TOPIC_DLQ = "raw-data-dlq";
     String RAW_DATA_HEADER_RETRY_COUNT = "raw-data-retry-count";
     int RAW_DATA_MAX_RETRY_COUNT = 3;
+    /**
+     * raw-data 消费组 ID 默认值；实际以配置 app.kafka.raw-data.group-id 为准，可覆盖以实现多点位/多组消费（见 docs/KafkaConsumerDesign.md）。
+     */
     String RAW_DATA_GROUP_ID = "raw-data-process-group";
 }
