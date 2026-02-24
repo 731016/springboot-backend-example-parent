@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xiaofei.springbootbackendkafka.constants.KafkaConstants;
 import com.xiaofei.springbootbackendkafka.mapper.DataDetailMapper;
 import com.xiaofei.springbootbackendkafka.mapper.DataStatisticsMapper;
+import com.xiaofei.springbootbackendkafka.mapper.WorkCalendarMapper;
 import com.xiaofei.springbootbackendkafka.model.dto.CollectedData;
 import com.xiaofei.springbootbackendkafka.model.entity.DataDetail;
 import com.xiaofei.springbootbackendkafka.model.entity.DataStatistics;
+import com.xiaofei.springbootbackendkafka.model.entity.WorkCalendar;
 import com.xiaofei.springbootbackendwebsocket.common.WebSocketConsts;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -27,11 +29,15 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author tuaofei
@@ -41,6 +47,12 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Slf4j
 public class DataProcessService {
+
+    /**
+     * 数据类型：1-正常数据，2-非统计数据
+     */
+    private static final Integer DATA_TYPE_NORMAL = 1;
+    private static final Integer DATA_TYPE_NON_STATISTICAL = 2;
 
     @Autowired
     private DataStatisticsMapper dataStatisticsMapper;
@@ -53,6 +65,9 @@ public class DataProcessService {
 
     @Autowired(required = false)
     private SimpMessagingTemplate wsTemplate;
+
+    @Autowired
+    private WorkCalendarMapper workCalendarMapper;
 
     @KafkaListener(topics = KafkaConstants.RAW_DATA_TOPIC, groupId = "${app.kafka.raw-data.group-id:raw-data-process-group}", containerFactory = "ackContainerFactory")
     public void processData(ConsumerRecords<String, String> records, Acknowledgment acknowledgment) {
@@ -91,32 +106,40 @@ public class DataProcessService {
         detail.setCollectTime(data.getCollectTime());
         detail.setValue(data.getValue());
         detail.setAttributeName(data.getAttributeName());
+        // 根据工作日历当前班次时间段判断是否为正常数据
+        boolean inCurrentShift = isInCurrentShift(data.getCollectTime());
+        detail.setDataType(inCurrentShift ? DATA_TYPE_NORMAL : DATA_TYPE_NON_STATISTICAL);
 
-        // 获取当前进行中的统计记录
-        DataStatistics statistics = dataStatisticsMapper.selectOne(
-                new QueryWrapper<DataStatistics>()
-                        .eq("pointCode", data.getPointCode())
-                        .eq("status", 1)
-        );
+        if (inCurrentShift) {
+            // 仅正常数据参与统计
+            DataStatistics statistics = dataStatisticsMapper.selectOne(
+                    new QueryWrapper<DataStatistics>()
+                            .eq("pointCode", data.getPointCode())
+                            .eq("status", 1)
+            );
 
-        if (statistics != null) {
-            detail.setStatisticsId(statistics.getId());
-            dataDetailMapper.insert(detail);
+            if (statistics != null) {
+                detail.setStatisticsId(statistics.getId());
+                dataDetailMapper.insert(detail);
 
-            // 更新统计数据
-            updateStatistics(statistics.getId());
+                // 更新统计数据
+                updateStatistics(statistics.getId());
+            } else {
+                DataStatistics newDataStatistics = new DataStatistics();
+                newDataStatistics.setPointCode(detail.getPointCode());
+                newDataStatistics.setStartTime(detail.getCollectTime());
+                newDataStatistics.setMaximumValue(detail.getValue());
+                newDataStatistics.setMinimumValue(detail.getValue());
+                newDataStatistics.setAverageValue(detail.getValue());
+                newDataStatistics.setCreateTime(detail.getCollectTime());
+                newDataStatistics.setUpdateTime(detail.getCollectTime());
+                dataStatisticsMapper.insert(newDataStatistics);
+
+                detail.setStatisticsId(newDataStatistics.getId());
+                dataDetailMapper.insert(detail);
+            }
         } else {
-            DataStatistics newDataStatistics = new DataStatistics();
-            newDataStatistics.setPointCode(detail.getPointCode());
-            newDataStatistics.setStartTime(detail.getCollectTime());
-            newDataStatistics.setMaximumValue(detail.getValue());
-            newDataStatistics.setMinimumValue(detail.getValue());
-            newDataStatistics.setAverageValue(detail.getValue());
-            newDataStatistics.setCreateTime(detail.getCollectTime());
-            newDataStatistics.setUpdateTime(detail.getCollectTime());
-            dataStatisticsMapper.insert(newDataStatistics);
-
-            detail.setStatisticsId(newDataStatistics.getId());
+            // 非统计数据：仍保存明细，只是不参与统计
             dataDetailMapper.insert(detail);
         }
 
@@ -223,22 +246,28 @@ public class DataProcessService {
                         .eq("statisticsId", statisticsId)
         );
 
-        if (!details.isEmpty()) {
+        // 仅使用正常数据（dataType 为空或为正常数据）参与统计
+        List<DataDetail> validDetails = details.stream()
+                .filter(detail -> detail.getDataType() == null
+                        || DATA_TYPE_NORMAL.equals(detail.getDataType()))
+                .collect(Collectors.toList());
+
+        if (!validDetails.isEmpty()) {
             // 计算统计值
-            BigDecimal maxValue = details.stream()
+            BigDecimal maxValue = validDetails.stream()
                     .map(DataDetail::getValue)
                     .max(BigDecimal::compareTo)
                     .orElse(null);
 
-            BigDecimal minValue = details.stream()
+            BigDecimal minValue = validDetails.stream()
                     .map(DataDetail::getValue)
                     .min(BigDecimal::compareTo)
                     .orElse(null);
 
-            BigDecimal avgValue = details.stream()
+            BigDecimal avgValue = validDetails.stream()
                     .map(DataDetail::getValue)
                     .reduce(BigDecimal.ZERO, BigDecimal::add)
-                    .divide(new BigDecimal(details.size()), 2, RoundingMode.HALF_UP);
+                    .divide(new BigDecimal(validDetails.size()), 2, RoundingMode.HALF_UP);
 
             // 更新统计记录
             DataStatistics statistics = new DataStatistics();
@@ -249,5 +278,59 @@ public class DataProcessService {
 
             dataStatisticsMapper.updateById(statistics);
         }
+    }
+
+    /**
+     * 判断采集时间是否在工作日历当前班次的时间段内
+     *
+     * @param collectTime 采集时间
+     * @return true-在当前班次时间段内，false-不在
+     */
+    private boolean isInCurrentShift(Date collectTime) {
+        if (collectTime == null) {
+            return false;
+        }
+
+        // 只按「年月日」定位工作日
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(collectTime);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date dayStart = cal.getTime();
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        Date nextDayStart = cal.getTime();
+
+        List<WorkCalendar> calendars = workCalendarMapper.selectList(
+                new QueryWrapper<WorkCalendar>()
+                        .ge("workDate", dayStart)
+                        .lt("workDate", nextDayStart)
+                        .eq("status", 1)
+        );
+
+        if (calendars == null || calendars.isEmpty()) {
+            // 当天没有启用的班次配置
+            return false;
+        }
+
+        // 只比较时分秒部分，忽略日期
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+        String collectTimeStr = timeFormat.format(collectTime);
+
+        for (WorkCalendar wc : calendars) {
+            if (wc.getShiftStartTime() == null || wc.getShiftEndTime() == null) {
+                continue;
+            }
+            String startStr = timeFormat.format(wc.getShiftStartTime());
+            String endStr = timeFormat.format(wc.getShiftEndTime());
+
+            // 班次开始时间 <= 采集时间 <= 班次结束时间
+            if (collectTimeStr.compareTo(startStr) >= 0 && collectTimeStr.compareTo(endStr) <= 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

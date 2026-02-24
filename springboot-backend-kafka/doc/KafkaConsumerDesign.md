@@ -152,3 +152,21 @@ bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --grou
 - Kafka 本身不提供“生产者当前状态”的查询接口；生产者是发完即走的。
 - 可观察：各 topic 的**最新 offset**（通过上面 describe 或本应用的 `consumer-groups/detail` 中的 `endOffset` 可间接反映写入进度）。
 - 需要更细监控时，可配合 JMX 暴露 Kafka Producer 指标（如发送成功率、延迟），或使用监控系统（如 Prometheus + Grafana、Kafka Manager、AKHQ 等）查看 broker 与 client 指标。
+
+
+运维日志
+1.当kafka异常停止可能导致，无法重启
+上次 Kafka 没正常关（杀进程、宕机、ZK 先挂等），ZK 里 /brokers/ids/0 还没被删掉（临时节点在 session 断开后才会被 ZK 删，有时会滞后或没清理干净）。
+
+方法一：用 ZK 客户端删掉旧节点（推荐）
+确保 ZooKeeper 在运行。
+打开 ZK 命令行客户端（在你 ZK 安装目录下，和 Kafka 自带的不冲突即可）：
+# 若用 Kafka 自带的 ZK：   D:\tools\kafka_2.13-3.7.2\bin\windows\zookeeper-shell.bat localhost:2181
+在 zk 里删除 broker 0 的注册节点：
+delete /brokers/ids/0
+退出后再启动 Kafka，不要删 kafka-logs。
+这样不会动到磁盘上的日志，消费到一半的 offset 和未消费的消息都不会丢。
+方法二：重启 ZooKeeper
+重启 ZooKeeper 会清掉所有临时节点（包括 /brokers/ids/0）。
+然后再启动 Kafka，它就能重新注册。
+同样不需要删 kafka-logs。

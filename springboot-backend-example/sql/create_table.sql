@@ -116,6 +116,8 @@ CREATE TABLE data_detail (
                              KEY idx_statisticsId (statisticsId)
 );
 
+ALTER TABLE data_detail ADD COLUMN dataType INT NULL COMMENT '数据类型：1-正常数据，2-非统计数据';
+
 CREATE TABLE `code_dictionary` (
                                    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
                                    `code` varchar(50) NOT NULL COMMENT '编码',

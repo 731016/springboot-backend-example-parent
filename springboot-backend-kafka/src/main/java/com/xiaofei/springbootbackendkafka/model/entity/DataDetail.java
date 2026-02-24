@@ -21,6 +21,10 @@ public class DataDetail {
     private BigDecimal value;
     private String attributeName;
     private Long statisticsId;
+    /**
+     * 数据类型：1-正常数据，2-非统计数据
+     */
+    private Integer dataType;
     private Date createTime;
     /**
      * 是否删除
