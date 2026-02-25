@@ -47,4 +47,11 @@ public interface KafkaConstants {
      * raw-data 消费组 ID 默认值；实际以配置 app.kafka.raw-data.group-id 为准，可覆盖以实现多点位/多组消费（见 docs/KafkaConsumerDesign.md）。
      */
     String RAW_DATA_GROUP_ID = "raw-data-process-group";
+
+    /**
+     * 数据类型：1-正常数据，2-非统计数据，3-超过上下限
+     */
+    Integer DATA_TYPE_NORMAL = 1;
+    Integer DATA_TYPE_NON_STATISTICAL = 2;
+    Integer DATA_TYPE_MORE_THAN_LIMIT = 3;
 }

@@ -3,13 +3,17 @@ package com.xiaofei.springbootbackendkafka.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xiaofei.springbootbackendcommon.common.ErrorCode;
+import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import com.xiaofei.springbootbackendkafka.constants.KafkaConstants;
 import com.xiaofei.springbootbackendkafka.mapper.DataDetailMapper;
 import com.xiaofei.springbootbackendkafka.mapper.DataStatisticsMapper;
+import com.xiaofei.springbootbackendkafka.mapper.PointConfigMapper;
 import com.xiaofei.springbootbackendkafka.mapper.WorkCalendarMapper;
 import com.xiaofei.springbootbackendkafka.model.dto.CollectedData;
 import com.xiaofei.springbootbackendkafka.model.entity.DataDetail;
 import com.xiaofei.springbootbackendkafka.model.entity.DataStatistics;
+import com.xiaofei.springbootbackendkafka.model.entity.PointConfig;
 import com.xiaofei.springbootbackendkafka.model.entity.WorkCalendar;
 import com.xiaofei.springbootbackendwebsocket.common.WebSocketConsts;
 import lombok.extern.slf4j.Slf4j;
@@ -48,17 +52,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DataProcessService {
 
-    /**
-     * 数据类型：1-正常数据，2-非统计数据
-     */
-    private static final Integer DATA_TYPE_NORMAL = 1;
-    private static final Integer DATA_TYPE_NON_STATISTICAL = 2;
-
     @Autowired
     private DataStatisticsMapper dataStatisticsMapper;
 
     @Autowired
     private DataDetailMapper dataDetailMapper;
+
+    @Autowired
+    private PointConfigMapper pointConfigMapper;
 
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -108,7 +109,26 @@ public class DataProcessService {
         detail.setAttributeName(data.getAttributeName());
         // 根据工作日历当前班次时间段判断是否为正常数据
         boolean inCurrentShift = isInCurrentShift(data.getCollectTime());
-        detail.setDataType(inCurrentShift ? DATA_TYPE_NORMAL : DATA_TYPE_NON_STATISTICAL);
+        detail.setDataType(inCurrentShift ? KafkaConstants.DATA_TYPE_NORMAL : KafkaConstants.DATA_TYPE_NON_STATISTICAL);
+
+        Integer dataType = detail.getDataType();
+        if (KafkaConstants.DATA_TYPE_NORMAL.equals(dataType)) {
+            // 获取点位配置
+            PointConfig config = pointConfigMapper.getByPointCode(detail.getPointCode());
+            if (config == null) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "点位配置不存在");
+            }
+            BigDecimal minLimit = config.getMinLimit();
+            BigDecimal maxLimit = config.getMaxLimit();
+            BigDecimal value = detail.getValue();
+            if (minLimit != null && maxLimit != null) {
+                if (value.compareTo(minLimit) >= 0 && value.compareTo(maxLimit) < 0) {
+
+                }else{
+                    detail.setDataType(KafkaConstants.DATA_TYPE_MORE_THAN_LIMIT);
+                }
+            }
+        }
 
         if (inCurrentShift) {
             // 仅正常数据参与统计
@@ -249,7 +269,7 @@ public class DataProcessService {
         // 仅使用正常数据（dataType 为空或为正常数据）参与统计
         List<DataDetail> validDetails = details.stream()
                 .filter(detail -> detail.getDataType() == null
-                        || DATA_TYPE_NORMAL.equals(detail.getDataType()))
+                        || KafkaConstants.DATA_TYPE_NORMAL.equals(detail.getDataType()))
                 .collect(Collectors.toList());
 
         if (!validDetails.isEmpty()) {

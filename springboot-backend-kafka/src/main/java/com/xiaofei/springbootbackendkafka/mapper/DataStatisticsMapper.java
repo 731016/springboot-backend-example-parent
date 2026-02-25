@@ -46,8 +46,21 @@ public interface DataStatisticsMapper extends BaseMapper<DataStatistics> {
             "status = 2, " +
             "endTime = #{endTime}, " +
             "updateTime = NOW() " +
-            "WHERE id = #{id}")
-    int completeStatistics(@Param("id") Long id, @Param("endTime") Date endTime);
+            "WHERE pointCode = #{pointCode}")
+    int completeStatistics(@Param("pointCode") String pointCode, @Param("endTime") Date endTime);
+
+    /**
+     * 更新状态为进行中
+     * @param pointCode
+     * @param endTime
+     * @return
+     */
+    @Update("UPDATE data_statistics SET " +
+            "status = 1, " +
+            "endTime = #{endTime}, " +
+            "updateTime = NOW() " +
+            "WHERE pointCode = #{pointCode}")
+    int runningStatistics(@Param("pointCode") String pointCode, @Param("endTime") Date endTime);
 
     /**
      * 获取时间范围内的统计数据

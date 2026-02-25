@@ -12,6 +12,7 @@ import com.xiaofei.springbootbackendcommon.exception.BusinessException;
 import com.xiaofei.springbootbackendkafka.mapper.PointConfigMapper;
 import com.xiaofei.springbootbackendkafka.model.dto.AddPointConfigRequest;
 import com.xiaofei.springbootbackendkafka.model.dto.PointConfigQueryRequest;
+import com.xiaofei.springbootbackendkafka.model.dto.UpdatePointConfigRequest;
 import com.xiaofei.springbootbackendkafka.model.entity.PointConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -85,6 +86,66 @@ public class PointConfigService {
         }
 
         return pointConfig.getId();
+    }
+
+    /**
+     * 更新采集点配置
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updatePointConfig(UpdatePointConfigRequest request) {
+        if (request == null || request.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空或 ID 为空");
+        }
+
+        PointConfig existPoint = pointConfigMapper.selectById(request.getId());
+        if (existPoint == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "点位配置不存在");
+        }
+
+        // 校验点位编码是否冲突（允许保持原编码）
+        PointConfig sameCodePoint = pointConfigMapper.getByPointCode(request.getPointCode());
+        if (sameCodePoint != null && !sameCodePoint.getId().equals(request.getId())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "点位编码已存在");
+        }
+
+        // 如果是主点位，检查是否已有其他主点位
+        if (Integer.valueOf(1).equals(request.getIsMainPoint())) {
+            PointConfig mainPoint = pointConfigMapper.getMainPoint();
+            if (mainPoint != null && !mainPoint.getId().equals(request.getId())) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "已存在主点位");
+            }
+        }
+
+        // 更新字段
+        existPoint.setPointCode(request.getPointCode());
+        existPoint.setPointName(request.getPointName());
+        existPoint.setValidUrl(request.getValidUrl());
+        existPoint.setDataUrl(request.getDataUrl());
+        existPoint.setMinLimit(request.getMinLimit());
+        existPoint.setMaxLimit(request.getMaxLimit());
+        existPoint.setIntervalSeconds(request.getIntervalSeconds());
+        existPoint.setIsMainPoint(request.getIsMainPoint());
+        existPoint.setStatus(request.getStatus());
+        existPoint.setUpdateTime(new Date());
+
+        int result = pointConfigMapper.updateById(existPoint);
+        if (result <= 0) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "更新点位配置失败");
+        }
+
+        // 如有需要，可在此重新校验 URL 连接
+        if (StrUtil.isNotBlank(request.getValidUrl())) {
+            try {
+                boolean isValid = testConnection(request.getDataUrl());
+                if (!isValid) {
+                    log.warn("点位验证URL连接失败: {}", request.getValidUrl());
+                    throw new BusinessException(ErrorCode.OPERATION_ERROR, String.format("点位验证URL连接失败: {%s}", request.getDataUrl()));
+                }
+            } catch (Exception e) {
+                log.error("验证URL连接异常: {}", request.getValidUrl(), e);
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, String.format("验证URL连接异常: {%s}", request.getDataUrl()));
+            }
+        }
     }
 
     /**
