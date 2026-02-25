@@ -1,7 +1,6 @@
 package com.xiaofei.springbootinit.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.xiaofei.springbootinit.model.entity.Post;
 import com.xiaofei.springbootinit.model.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 

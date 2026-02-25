@@ -1,10 +1,8 @@
 package com.xiaofei.springbootbackendelasticsearch.job;
 
 import cn.hutool.core.collection.CollUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xiaofei.springbootbackendelasticsearch.esdao.UserEsDao;
 import com.xiaofei.springbootbackendelasticsearch.model.dto.UserEsDTO;
-import com.xiaofei.springbootinit.mapper.PostMapper;
 import com.xiaofei.springbootinit.mapper.UserMapper;
 import com.xiaofei.springbootinit.model.entity.User;
 import lombok.extern.slf4j.Slf4j;

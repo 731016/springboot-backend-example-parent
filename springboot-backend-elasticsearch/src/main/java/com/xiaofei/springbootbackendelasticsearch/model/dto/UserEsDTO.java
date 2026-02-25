@@ -1,12 +1,8 @@
 package com.xiaofei.springbootbackendelasticsearch.model.dto;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.json.JSONUtil;
 import com.xiaofei.springbootinit.model.dto.post.PostEsDTO;
-import com.xiaofei.springbootinit.model.entity.Post;
 import com.xiaofei.springbootinit.model.entity.User;
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -15,7 +11,6 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 用户 ES 文档
