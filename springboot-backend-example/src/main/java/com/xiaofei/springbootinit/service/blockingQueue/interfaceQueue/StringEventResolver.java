@@ -1,9 +1,9 @@
-package com.xiaofei.springbootinit.example.blockingQueue.test;
+package com.xiaofei.springbootinit.service.blockingQueue.interfaceQueue;
 
 import cn.hutool.json.JSONUtil;
-import com.xiaofei.springbootinit.example.blockingQueue.EventContext;
-import com.xiaofei.springbootinit.example.blockingQueue.EventResolver;
-import com.xiaofei.springbootinit.example.blockingQueue.data.RequestData;
+import com.xiaofei.springbootinit.service.blockingQueue.EventContext;
+import com.xiaofei.springbootinit.service.blockingQueue.EventResolver;
+import com.xiaofei.springbootinit.model.dto.blockingQueue.RequestData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

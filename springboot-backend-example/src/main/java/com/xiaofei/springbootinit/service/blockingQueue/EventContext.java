@@ -1,4 +1,4 @@
-package com.xiaofei.springbootinit.example.blockingQueue;
+package com.xiaofei.springbootinit.service.blockingQueue;
 
 import java.util.HashMap;
 import java.util.Map;

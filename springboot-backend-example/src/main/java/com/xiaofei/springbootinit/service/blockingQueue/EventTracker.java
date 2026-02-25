@@ -1,13 +1,10 @@
-package com.xiaofei.springbootinit.example.blockingQueue;
+package com.xiaofei.springbootinit.service.blockingQueue;
 
-import com.xiaofei.springbootinit.example.blockingQueue.data.RequestData;
-import com.xiaofei.springbootinit.model.entity.User;
+import com.xiaofei.springbootinit.model.dto.blockingQueue.RequestData;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -84,7 +81,23 @@ public class EventTracker {
     /**
      * 是否启用
      */
-    private boolean enable = true;
+    private volatile boolean enable = true;
+
+    public int getCurWorkerNum() {
+        return curWorkerNum.get();
+    }
+
+    public int getMaxWorkers() {
+        return max_workers;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
+    }
 
     /**
      * 当队列中的任务大于此数 并且线程没有达到最大值的时候，会添加新的处理线程

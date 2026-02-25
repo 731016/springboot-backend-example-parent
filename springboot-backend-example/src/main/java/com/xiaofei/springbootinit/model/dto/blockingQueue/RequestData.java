@@ -1,4 +1,4 @@
-package com.xiaofei.springbootinit.example.blockingQueue.data;
+package com.xiaofei.springbootinit.model.dto.blockingQueue;
 
 import lombok.Data;
 

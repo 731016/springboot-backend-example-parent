@@ -1,6 +1,6 @@
-package com.xiaofei.springbootinit.example.blockingQueue;
+package com.xiaofei.springbootinit.service.blockingQueue;
 
-import com.xiaofei.springbootinit.example.blockingQueue.data.RequestData;
+import com.xiaofei.springbootinit.model.dto.blockingQueue.RequestData;
 import org.springframework.beans.factory.InitializingBean;
 
 import javax.annotation.Resource;

@@ -1,6 +1,6 @@
-package com.xiaofei.springbootinit.example.blockingQueue.test;
+package com.xiaofei.springbootinit.service.blockingQueue.interfaceQueue;
 
-import com.xiaofei.springbootinit.example.blockingQueue.data.RequestData;
+import com.xiaofei.springbootinit.model.dto.blockingQueue.RequestData;
 import lombok.Data;
 
 /**
