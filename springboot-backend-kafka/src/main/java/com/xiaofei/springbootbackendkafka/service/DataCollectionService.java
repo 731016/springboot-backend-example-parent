@@ -147,8 +147,6 @@ public class DataCollectionService {
 
         // 更新运行状态
         pointConfigMapper.updateRunningStatus(pointCode, 1);
-        Date nowDate = new Date();
-        dataStatisticsMapper.runningStatistics(pointCode, nowDate);
 
         log.info("采集任务已启动: {}", pointCode);
     }
@@ -163,8 +161,6 @@ public class DataCollectionService {
         }
         // 更新运行状态
         pointConfigMapper.updateRunningStatus(pointCode, 0);
-        Date nowDate = new Date();
-        dataStatisticsMapper.completeStatistics(pointCode, nowDate);
         log.info("采集任务已停止: {}", pointCode);
     }
 
