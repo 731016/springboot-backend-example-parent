@@ -20,8 +20,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
 @MapperScan({
         "com.xiaofei.springbootbackendkafka.mapper",
-        "com.xiaofei.springbootinit.mapper",
-        "com.xiaofei.springbootinit.example.commonserviceExec.mapper"
+        "com.xiaofei.springbootinit.mapper"
 })
 public class KafkaApplication {
 

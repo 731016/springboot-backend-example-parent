@@ -19,8 +19,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
 @MapperScan({
-        "com.xiaofei.springbootinit.mapper",
-        "com.xiaofei.springbootinit.example.commonserviceExec.mapper"
+        "com.xiaofei.springbootinit.mapper"
 })
 public class MainApplication {
 

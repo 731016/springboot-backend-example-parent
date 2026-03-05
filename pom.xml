@@ -35,6 +35,8 @@
         <cn.hutool.version>5.8.8</cn.hutool.version>
         <mybatis-spring-boot-starter-version>2.2.2</mybatis-spring-boot-starter-version>
         <mybatis-plus-boot-starter-version>3.5.2</mybatis-plus-boot-starter-version>
+        <spring-ai-alibaba-bom-version>1.0.0.2</spring-ai-alibaba-bom-version>
+        <spring-ai-bom-version>1.0.0</spring-ai-bom-version>
     </properties>
 
     <dependencyManagement>
@@ -75,6 +77,20 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis-plus-boot-starter-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud.ai</groupId>
+                <artifactId>spring-ai-alibaba-bom</artifactId>
+                <version>${spring-ai-alibaba-bom-version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai-bom-version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

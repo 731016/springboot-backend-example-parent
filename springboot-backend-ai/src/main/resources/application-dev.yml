@@ -1,0 +1,59 @@
+spring:
+  # 数据库配置
+  datasource:
+    master:
+      jdbc-url: jdbc:mysql://localhost:3306/my_db?serverTimezone=Asia/Shanghai
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      username: root
+      password: root
+    lovefinder:
+      jdbc-url: jdbc:mysql://localhost:3306/lovefinder?serverTimezone=Asia/Shanghai
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      username: root
+      password: root
+  # Redis 配置
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 10000ms
+    # Redis默认情况下有16个分片，这里配置具体使用的分片
+    database: 1
+    lettuce:
+      pool:
+        # 连接池最大连接数（使用负值表示没有限制） 默认 8
+        max-active: 8
+        # 连接池最大阻塞等待时间（使用负值表示没有限制） 默认 -1
+        max-wait: -1ms
+        # 连接池中的最大空闲连接 默认 8
+        max-idle: 8
+        # 连接池中的最小空闲连接 默认 0
+        min-idle: 0
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: isDelete # 全局逻辑删除的实体字段名
+      logic-delete-value: 1 # 逻辑已删除值（默认为 1）
+      logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
+server:
+  address: 0.0.0.0
+  port: 8108
+  servlet:
+    context-path: /api
+    # cookie 30 天过期
+    session:
+      cookie:
+        max-age: 2592000
+# 接口文档配置
+knife4j:
+  enable: true
+  openapi:
+    title: "ai接口文档"
+    version: 1.0
+    group:
+      default:
+        api-rule: package
+        api-rule-resources:
+          - com.xiaofei.springbootbackendai.controller
