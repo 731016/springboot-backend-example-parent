@@ -22,6 +22,8 @@ public class PointConfig {
     private String dataUrl;
     private BigDecimal minLimit;
     private BigDecimal maxLimit;
+    private Integer spcGroupSize;
+    private String spcRuleConfig;
     private Integer intervalSeconds;
     private Integer isMainPoint;
     private Integer status;

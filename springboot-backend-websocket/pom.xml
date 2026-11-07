@@ -50,6 +50,9 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <!-- 本模块被 kafka 等模块作为依赖使用，可执行 jar 使用 classifier，
+                         保留原始 jar 作为主构件，否则 fat jar 的类在 BOOT-INF/classes 下无法被其他模块引用 -->
+                    <classifier>exec</classifier>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

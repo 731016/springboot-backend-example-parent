@@ -81,8 +81,15 @@ CREATE TABLE point_config (
                               createTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                               updateTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                               isDeleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除(0-未删除,1-已删除)',
-                              runningStatus TINYINT NOT NULL DEFAULT 0 COMMENT '运行状态(0-停止,1-运行中)'
+                              runningStatus TINYINT NOT NULL DEFAULT 0 COMMENT '运行状态(0-停止,1-运行中)',
+                              spcGroupSize INT NOT NULL DEFAULT 5 COMMENT 'SPC子组大小(2-25)',
+                              spcRuleConfig VARCHAR(200) NULL COMMENT 'SPC判异规则(JSON数组，如["R1","R2"])'
 );
+
+-- 已有点位配置表升级脚本（SPC 子组大小与判异规则，仅在旧库手动执行一次）
+-- ALTER TABLE point_config
+--     ADD COLUMN spcGroupSize INT NOT NULL DEFAULT 5 COMMENT 'SPC子组大小(2-25)',
+--     ADD COLUMN spcRuleConfig VARCHAR(200) NULL COMMENT 'SPC判异规则(JSON数组，如["R1","R2"])';
 
 -- 数据统计主表
 CREATE TABLE data_statistics (

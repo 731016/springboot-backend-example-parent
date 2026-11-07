@@ -31,6 +31,11 @@ import java.util.Date;
 @Slf4j
 public class PointConfigService {
 
+    /**
+     * 默认启用全部 SPC 判异规则
+     */
+    private static final String DEFAULT_SPC_RULE_CONFIG = "[\"R1\",\"R2\",\"R3\",\"R4\",\"R5\",\"R6\",\"R7\",\"R8\"]";
+
     @Autowired
     private PointConfigMapper pointConfigMapper;
 
@@ -58,6 +63,8 @@ public class PointConfigService {
         pointConfig.setDataUrl(request.getDataUrl());
         pointConfig.setMinLimit(request.getMinLimit());
         pointConfig.setMaxLimit(request.getMaxLimit());
+        pointConfig.setSpcGroupSize(request.getSpcGroupSize() == null ? 5 : request.getSpcGroupSize());
+        pointConfig.setSpcRuleConfig(StrUtil.isBlank(request.getSpcRuleConfig()) ? DEFAULT_SPC_RULE_CONFIG : request.getSpcRuleConfig());
         pointConfig.setIntervalSeconds(request.getIntervalSeconds());
         pointConfig.setIsMainPoint(request.getIsMainPoint());
         pointConfig.setStatus(request.getStatus());
@@ -123,6 +130,8 @@ public class PointConfigService {
         existPoint.setDataUrl(request.getDataUrl());
         existPoint.setMinLimit(request.getMinLimit());
         existPoint.setMaxLimit(request.getMaxLimit());
+        existPoint.setSpcGroupSize(request.getSpcGroupSize() == null ? 5 : request.getSpcGroupSize());
+        existPoint.setSpcRuleConfig(StrUtil.isBlank(request.getSpcRuleConfig()) ? DEFAULT_SPC_RULE_CONFIG : request.getSpcRuleConfig());
         existPoint.setIntervalSeconds(request.getIntervalSeconds());
         existPoint.setIsMainPoint(request.getIsMainPoint());
         existPoint.setStatus(request.getStatus());

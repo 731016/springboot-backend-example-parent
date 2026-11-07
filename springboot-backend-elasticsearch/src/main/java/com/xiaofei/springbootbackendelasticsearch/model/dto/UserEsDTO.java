@@ -1,6 +1,5 @@
 package com.xiaofei.springbootbackendelasticsearch.model.dto;
 
-import com.xiaofei.springbootinit.model.dto.post.PostEsDTO;
 import com.xiaofei.springbootinit.model.entity.User;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;

@@ -127,6 +127,10 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <!-- 本模块同时被 kafka、fileupload 等模块作为依赖使用，
+                         打包可执行 jar 时使用 classifier，保留原始 jar 作为主构件（类在根路径），
+                         否则 repackage 后的 fat jar（类在 BOOT-INF/classes）无法被其他模块编译引用 -->
+                    <classifier>exec</classifier>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

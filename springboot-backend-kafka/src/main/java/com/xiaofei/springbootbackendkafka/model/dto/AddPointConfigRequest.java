@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
@@ -34,6 +35,12 @@ public class AddPointConfigRequest {
     private BigDecimal minLimit;
 
     private BigDecimal maxLimit;
+
+    @Min(value = 2, message = "SPC子组大小不能小于2")
+    @Max(value = 25, message = "SPC子组大小不能大于25")
+    private Integer spcGroupSize = 5;
+
+    private String spcRuleConfig;
 
     @Min(value = 1, message = "采集间隔必须大于0")
     private Integer intervalSeconds;

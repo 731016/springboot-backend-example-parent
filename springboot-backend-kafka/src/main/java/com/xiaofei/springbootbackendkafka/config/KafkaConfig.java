@@ -29,6 +29,13 @@ public class KafkaConfig {
     /** 消费者并发数，建议 ≤ topic 分区数；缺省 3 */
     private int consumerConcurrency = 3;
 
+    private String consumerGroupId = "";
+
+    @Value("${app.kafka.raw-data.group-id:raw-data-process-group}")
+    public void setConsumerGroupId(String consumerGroupId) {
+        this.consumerGroupId = consumerGroupId;
+    }
+
     @Value("${app.kafka.consumer-concurrency:3}")
     public void setConsumerConcurrency(int consumerConcurrency) {
         this.consumerConcurrency = consumerConcurrency;
