@@ -31,6 +31,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
@@ -40,6 +41,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -108,7 +110,8 @@ public class DataProcessService {
         detail.setValue(data.getValue());
         detail.setAttributeName(data.getAttributeName());
         // 根据工作日历当前班次时间段判断是否为正常数据
-        boolean inCurrentShift = isInCurrentShift(data.getCollectTime());
+        WorkCalendar currentShift = findCurrentShift(data.getCollectTime());
+        boolean inCurrentShift = currentShift != null;
         detail.setDataType(inCurrentShift ? KafkaConstants.DATA_TYPE_NORMAL : KafkaConstants.DATA_TYPE_NON_STATISTICAL);
 
         Integer dataType = detail.getDataType();
@@ -131,12 +134,19 @@ public class DataProcessService {
         }
 
         if (inCurrentShift) {
-            // 仅正常数据参与统计
+            // 班次内的数据按点位归入同一条进行中的统计记录
             DataStatistics statistics = dataStatisticsMapper.selectOne(
                     new QueryWrapper<DataStatistics>()
                             .eq("pointCode", data.getPointCode())
                             .eq("status", 1)
             );
+
+            // 进行中的统计记录不属于本次采集所在班次时，先关闭旧记录
+            if (statistics != null
+                    && !isSameShift(statistics.getStartTime(), detail.getCollectTime(), currentShift)) {
+                closeStatistics(statistics);
+                statistics = null;
+            }
 
             if (statistics != null) {
                 detail.setStatisticsId(statistics.getId());
@@ -145,18 +155,7 @@ public class DataProcessService {
                 // 更新统计数据
                 updateStatistics(statistics.getId());
             } else {
-                DataStatistics newDataStatistics = new DataStatistics();
-                newDataStatistics.setPointCode(detail.getPointCode());
-                newDataStatistics.setStartTime(detail.getCollectTime());
-                newDataStatistics.setMaximumValue(detail.getValue());
-                newDataStatistics.setMinimumValue(detail.getValue());
-                newDataStatistics.setAverageValue(detail.getValue());
-                newDataStatistics.setCreateTime(detail.getCollectTime());
-                newDataStatistics.setUpdateTime(detail.getCollectTime());
-                dataStatisticsMapper.insert(newDataStatistics);
-
-                detail.setStatisticsId(newDataStatistics.getId());
-                dataDetailMapper.insert(detail);
+                createStatistics(detail);
             }
         } else {
             // 非统计数据：仍保存明细，只是不参与统计
@@ -259,6 +258,48 @@ public class DataProcessService {
         }
     }
 
+    /**
+     * 新建一条进行中的统计记录，并关联当前明细
+     */
+    private void createStatistics(DataDetail detail) {
+        DataStatistics statistics = new DataStatistics();
+        statistics.setPointCode(detail.getPointCode());
+        statistics.setStartTime(detail.getCollectTime());
+        statistics.setEndTime(detail.getCollectTime());
+        statistics.setSampleCount(0);
+        statistics.setOutOfLimitCount(0);
+        statistics.setStatus(1);
+
+        if (isNormalDetail(detail)) {
+            statistics.setSampleCount(1);
+            statistics.setMaximumValue(detail.getValue());
+            statistics.setMinimumValue(detail.getValue());
+            statistics.setAverageValue(detail.getValue());
+            statistics.setStandardDeviation(BigDecimal.ZERO);
+        } else {
+            statistics.setOutOfLimitCount(1);
+        }
+
+        statistics.setCreateTime(detail.getCollectTime());
+        statistics.setUpdateTime(detail.getCollectTime());
+        dataStatisticsMapper.insert(statistics);
+
+        detail.setStatisticsId(statistics.getId());
+        dataDetailMapper.insert(detail);
+    }
+
+    /**
+     * 关闭指定统计记录（班次结束后不再接收数据）
+     */
+    private void closeStatistics(DataStatistics statistics) {
+        DataStatistics update = new DataStatistics();
+        update.setId(statistics.getId());
+        update.setStatus(2);
+        update.setEndTime(statistics.getEndTime() != null
+                ? statistics.getEndTime() : statistics.getUpdateTime());
+        dataStatisticsMapper.updateById(update);
+    }
+
     private void updateStatistics(Long statisticsId) {
         // 获取该统计ID下的所有明细数据
         List<DataDetail> details = dataDetailMapper.selectList(
@@ -268,12 +309,23 @@ public class DataProcessService {
 
         // 仅使用正常数据（dataType 为空或为正常数据）参与统计
         List<DataDetail> validDetails = details.stream()
-                .filter(detail -> detail.getDataType() == null
-                        || KafkaConstants.DATA_TYPE_NORMAL.equals(detail.getDataType()))
+                .filter(this::isNormalDetail)
                 .collect(Collectors.toList());
 
+        DataStatistics statistics = new DataStatistics();
+        statistics.setId(statisticsId);
+        statistics.setSampleCount(validDetails.size());
+        statistics.setOutOfLimitCount((int) details.stream()
+                .filter(detail -> KafkaConstants.DATA_TYPE_MORE_THAN_LIMIT.equals(detail.getDataType()))
+                .count());
+
         if (!validDetails.isEmpty()) {
-            // 计算统计值
+            BigDecimal sumValue = validDetails.stream()
+                    .map(DataDetail::getValue)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal preciseAverage = sumValue.divide(
+                    BigDecimal.valueOf(validDetails.size()), 10, RoundingMode.HALF_UP);
+
             BigDecimal maxValue = validDetails.stream()
                     .map(DataDetail::getValue)
                     .max(BigDecimal::compareTo)
@@ -284,31 +336,83 @@ public class DataProcessService {
                     .min(BigDecimal::compareTo)
                     .orElse(null);
 
-            BigDecimal avgValue = validDetails.stream()
-                    .map(DataDetail::getValue)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add)
-                    .divide(new BigDecimal(validDetails.size()), 2, RoundingMode.HALF_UP);
-
-            // 更新统计记录
-            DataStatistics statistics = new DataStatistics();
-            statistics.setId(statisticsId);
             statistics.setMaximumValue(maxValue);
             statistics.setMinimumValue(minValue);
-            statistics.setAverageValue(avgValue);
-
-            dataStatisticsMapper.updateById(statistics);
+            statistics.setAverageValue(preciseAverage.setScale(6, RoundingMode.HALF_UP));
+            statistics.setStandardDeviation(calcStandardDeviation(validDetails, preciseAverage));
         }
+
+        // 起止时间取该统计记录下明细的实际时间范围
+        details.stream()
+                .map(DataDetail::getCollectTime)
+                .filter(Objects::nonNull)
+                .min(Date::compareTo)
+                .ifPresent(statistics::setStartTime);
+        details.stream()
+                .map(DataDetail::getCollectTime)
+                .filter(Objects::nonNull)
+                .max(Date::compareTo)
+                .ifPresent(statistics::setEndTime);
+
+        dataStatisticsMapper.updateById(statistics);
     }
 
     /**
-     * 判断采集时间是否在工作日历当前班次的时间段内
+     * 计算样本标准差（n-1）
+     */
+    private BigDecimal calcStandardDeviation(List<DataDetail> details, BigDecimal average) {
+        if (details.size() < 2) {
+            return BigDecimal.ZERO;
+        }
+        BigDecimal sumOfSquares = details.stream()
+                .map(detail -> detail.getValue().subtract(average).pow(2))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal variance = sumOfSquares.divide(
+                BigDecimal.valueOf(details.size() - 1), 10, RoundingMode.HALF_UP);
+        return variance.sqrt(new MathContext(10, RoundingMode.HALF_UP))
+                .setScale(6, RoundingMode.HALF_UP);
+    }
+
+    private boolean isNormalDetail(DataDetail detail) {
+        return detail.getDataType() == null
+                || KafkaConstants.DATA_TYPE_NORMAL.equals(detail.getDataType());
+    }
+
+    /**
+     * 判断统计记录的起始时间与本次采集时间是否属于同一个班次
+     *
+     * @param statisticsStartTime 统计记录开始时间
+     * @param collectTime         本次采集时间
+     * @param shift               采集时间所在的班次
+     * @return true-同一班次，false-不同班次
+     */
+    private boolean isSameShift(Date statisticsStartTime, Date collectTime, WorkCalendar shift) {
+        if (statisticsStartTime == null || collectTime == null || shift == null
+                || shift.getShiftStartTime() == null || shift.getShiftEndTime() == null) {
+            return false;
+        }
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        if (!dateFormat.format(statisticsStartTime).equals(dateFormat.format(collectTime))) {
+            return false;
+        }
+
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+        String statisticsTime = timeFormat.format(statisticsStartTime);
+        String shiftStart = timeFormat.format(shift.getShiftStartTime());
+        String shiftEnd = timeFormat.format(shift.getShiftEndTime());
+        return statisticsTime.compareTo(shiftStart) >= 0 && statisticsTime.compareTo(shiftEnd) <= 0;
+    }
+
+    /**
+     * 查询采集时间所在的工作日历班次
      *
      * @param collectTime 采集时间
-     * @return true-在当前班次时间段内，false-不在
+     * @return 所在班次，不在任何班次时间段内时返回 null
      */
-    private boolean isInCurrentShift(Date collectTime) {
+    private WorkCalendar findCurrentShift(Date collectTime) {
         if (collectTime == null) {
-            return false;
+            return null;
         }
 
         // 只按「年月日」定位工作日
@@ -331,7 +435,7 @@ public class DataProcessService {
 
         if (calendars == null || calendars.isEmpty()) {
             // 当天没有启用的班次配置
-            return false;
+            return null;
         }
 
         // 只比较时分秒部分，忽略日期
@@ -347,10 +451,10 @@ public class DataProcessService {
 
             // 班次开始时间 <= 采集时间 <= 班次结束时间
             if (collectTimeStr.compareTo(startStr) >= 0 && collectTimeStr.compareTo(endStr) <= 0) {
-                return true;
+                return wc;
             }
         }
 
-        return false;
+        return null;
     }
 }

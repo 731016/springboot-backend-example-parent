@@ -18,8 +18,8 @@ public class PointConfig {
     private Long id;
     private String pointCode;
     private String pointName;
-    private String validUrl;
-    private String dataUrl;
+    private String unit;
+    private Long sourceId;
     private BigDecimal minLimit;
     private BigDecimal maxLimit;
     private Integer spcGroupSize;

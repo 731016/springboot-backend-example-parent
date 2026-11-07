@@ -86,9 +86,11 @@ public class DataCollectionController {
      * 根据点位编码查询采集数据
      */
     @GetMapping("/data/detail/{pointCode}")
-    public BaseResponse<List<DataDetail>> getDataDetailsByPointCode(@PathVariable String pointCode) {
+    public BaseResponse<List<DataDetail>> getDataDetailsByPointCode(
+            @PathVariable String pointCode,
+            @RequestParam(value = "limit", required = false) Integer limit) {
         try {
-            List<DataDetail> dataDetails = dataCollectionService.getDataDetailsByPointCode(pointCode);
+            List<DataDetail> dataDetails = dataCollectionService.getDataDetailsByPointCode(pointCode, limit);
             return ResultUtils.success(dataDetails);
         } catch (Exception e) {
             log.error("查询采集数据失败", e);

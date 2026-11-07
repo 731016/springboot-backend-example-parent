@@ -71,6 +71,7 @@ CREATE TABLE point_config (
                               id BIGINT PRIMARY KEY AUTO_INCREMENT,
                               pointCode VARCHAR(50) NOT NULL COMMENT '点位编码',
                               pointName VARCHAR(100) NOT NULL COMMENT '点位名称',
+                              unit VARCHAR(20) NULL COMMENT '计量单位',
                               validUrl VARCHAR(200) NOT NULL COMMENT '数据有效性检查接口',
                               dataUrl VARCHAR(200) NOT NULL COMMENT '数据采集接口',
                               minLimit DECIMAL(10,2) COMMENT '数据下限',
@@ -97,9 +98,12 @@ CREATE TABLE data_statistics (
                                  pointCode VARCHAR(50) NOT NULL COMMENT '点位编码',
                                  startTime DATETIME NOT NULL COMMENT '开始时间',
                                  endTime DATETIME COMMENT '结束时间',
-                                 maximumValue DECIMAL(10,2) COMMENT '最大值',
-                                 minimumValue DECIMAL(10,2) COMMENT '最小值',
-                                 averageValue DECIMAL(10,2) COMMENT '平均值',
+                                 maximumValue DECIMAL(18,6) COMMENT '最大值',
+                                 minimumValue DECIMAL(18,6) COMMENT '最小值',
+                                 averageValue DECIMAL(18,6) COMMENT '平均值',
+                                 standardDeviation DECIMAL(18,6) COMMENT '标准差(样本标准差)',
+                                 sampleCount INT DEFAULT 0 COMMENT '参与统计的样本数',
+                                 outOfLimitCount INT DEFAULT 0 COMMENT '超限次数',
                                  status TINYINT DEFAULT 1 COMMENT '状态(1-进行中,2-已完成)',
                                  createTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                                  updateTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -113,7 +117,7 @@ CREATE TABLE data_detail (
                              id BIGINT PRIMARY KEY AUTO_INCREMENT,
                              pointCode VARCHAR(50) NOT NULL COMMENT '点位编码',
                              collectTime DATETIME NOT NULL COMMENT '采集时间',
-                             value DECIMAL(10,2) NOT NULL COMMENT '采集值',
+                             value DECIMAL(18,6) NOT NULL COMMENT '采集值',
                              attributeName VARCHAR(50) COMMENT '属性名',
                              statisticsId BIGINT COMMENT '关联的统计ID',
                              createTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -124,6 +128,172 @@ CREATE TABLE data_detail (
 );
 
 ALTER TABLE data_detail ADD COLUMN dataType INT NULL COMMENT '数据类型：1-正常数据，2-非统计数据';
+
+-- 采集值精度提升，满足 SPC 计算需要（已存在的表执行以下升级语句）
+ALTER TABLE data_detail MODIFY COLUMN value DECIMAL(18,6) NOT NULL COMMENT '采集值';
+
+-- data_statistics 扩展字段（已存在的表执行以下升级语句，新库无需执行）
+ALTER TABLE data_statistics MODIFY COLUMN maximumValue DECIMAL(18,6) COMMENT '最大值';
+ALTER TABLE data_statistics MODIFY COLUMN minimumValue DECIMAL(18,6) COMMENT '最小值';
+ALTER TABLE data_statistics MODIFY COLUMN averageValue DECIMAL(18,6) COMMENT '平均值';
+ALTER TABLE data_statistics ADD COLUMN standardDeviation DECIMAL(18,6) COMMENT '标准差(样本标准差)';
+ALTER TABLE data_statistics ADD COLUMN sampleCount INT DEFAULT 0 COMMENT '参与统计的样本数';
+ALTER TABLE data_statistics ADD COLUMN outOfLimitCount INT DEFAULT 0 COMMENT '超限次数';
+
+-- 按明细回填历史统计数据（仅升级已有数据时执行一次）
+UPDATE data_statistics s
+JOIN (
+    SELECT statisticsId,
+           COUNT(CASE WHEN dataType IS NULL OR dataType = 1 THEN 1 END) AS sampleCount,
+           COUNT(CASE WHEN dataType = 3 THEN 1 END) AS outOfLimitCount,
+           MAX(CASE WHEN dataType IS NULL OR dataType = 1 THEN value END) AS maximumValue,
+           MIN(CASE WHEN dataType IS NULL OR dataType = 1 THEN value END) AS minimumValue,
+           ROUND(AVG(CASE WHEN dataType IS NULL OR dataType = 1 THEN value END), 6) AS averageValue,
+           ROUND(STDDEV_SAMP(CASE WHEN dataType IS NULL OR dataType = 1 THEN value END), 6) AS standardDeviation,
+           MIN(collectTime) AS firstTime,
+           MAX(collectTime) AS lastTime
+    FROM data_detail
+    WHERE statisticsId IS NOT NULL
+    GROUP BY statisticsId
+) d ON s.id = d.statisticsId
+SET s.sampleCount = d.sampleCount,
+    s.outOfLimitCount = d.outOfLimitCount,
+    s.maximumValue = d.maximumValue,
+    s.minimumValue = d.minimumValue,
+    s.averageValue = d.averageValue,
+    s.standardDeviation = d.standardDeviation,
+    s.startTime = COALESCE(d.firstTime, s.startTime),
+    s.endTime = COALESCE(s.endTime, d.lastTime);
+
+-- 关闭历史遗留的进行中记录
+UPDATE data_statistics SET status = 2 WHERE status = 1 AND endTime IS NOT NULL AND endTime < CURDATE();
+
+-- ==================== 采集数据源（多协议） ====================
+
+-- 采集源主表
+CREATE TABLE IF NOT EXISTS collector_source (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    sourceCode VARCHAR(64) NOT NULL COMMENT '数据源编码',
+    sourceName VARCHAR(100) NOT NULL COMMENT '数据源名称',
+    protocol VARCHAR(20) NOT NULL COMMENT '协议：HTTP/MODBUS_TCP/OPC_UA',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态(0-禁用,1-启用)',
+    remark VARCHAR(255) NULL COMMENT '备注',
+    createTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updateTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    isDeleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除(0-未删除,1-已删除)',
+    UNIQUE KEY uk_sourceCode (sourceCode)
+) COMMENT '采集数据源';
+
+-- HTTP 采集源配置
+CREATE TABLE IF NOT EXISTS collector_http_config (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    sourceId BIGINT NOT NULL COMMENT '采集源ID',
+    baseUrl VARCHAR(500) NOT NULL COMMENT '采集接口地址',
+    validUrl VARCHAR(500) NULL COMMENT '连通性测试地址（为空时使用 baseUrl）',
+    method VARCHAR(10) NOT NULL DEFAULT 'POST' COMMENT '请求方法',
+    contentType VARCHAR(100) NOT NULL DEFAULT 'application/json' COMMENT 'Content-Type',
+    headers TEXT NULL COMMENT '附加请求头 JSON 对象',
+    requestTemplate TEXT NULL COMMENT '请求体模板，支持 ${pointCode} ${collectTime}',
+    responseDataPath VARCHAR(200) NULL DEFAULT 'data' COMMENT '响应数据节点路径，如 data.result',
+    valueField VARCHAR(50) NOT NULL DEFAULT 'value' COMMENT '值字段名',
+    attributeNameField VARCHAR(50) NULL DEFAULT 'attributeName' COMMENT '属性名字段名',
+    timeoutMillis INT NOT NULL DEFAULT 5000 COMMENT '超时时间(毫秒)',
+    UNIQUE KEY uk_sourceId (sourceId)
+) COMMENT 'HTTP采集源配置';
+
+-- Modbus TCP 采集源配置
+CREATE TABLE IF NOT EXISTS collector_modbus_config (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    sourceId BIGINT NOT NULL COMMENT '采集源ID',
+    host VARCHAR(100) NOT NULL COMMENT '从站地址',
+    port INT NOT NULL DEFAULT 502 COMMENT '从站端口',
+    slaveId INT NOT NULL DEFAULT 1 COMMENT '从站地址(UnitId)',
+    connectTimeoutMillis INT NOT NULL DEFAULT 3000 COMMENT '连接超时(毫秒)',
+    readTimeoutMillis INT NOT NULL DEFAULT 3000 COMMENT '读取超时(毫秒)',
+    UNIQUE KEY uk_sourceId (sourceId)
+) COMMENT 'Modbus TCP采集源配置';
+
+-- OPC UA 采集源配置
+CREATE TABLE IF NOT EXISTS collector_opcua_config (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    sourceId BIGINT NOT NULL COMMENT '采集源ID',
+    endpointUrl VARCHAR(500) NOT NULL COMMENT 'Endpoint URL',
+    securityPolicy VARCHAR(50) NOT NULL DEFAULT 'None' COMMENT '安全策略',
+    username VARCHAR(100) NULL COMMENT '用户名',
+    password VARCHAR(200) NULL COMMENT '密码',
+    requestTimeoutMillis INT NOT NULL DEFAULT 5000 COMMENT '请求超时(毫秒)',
+    UNIQUE KEY uk_sourceId (sourceId)
+) COMMENT 'OPC UA采集源配置';
+
+-- Modbus 点位绑定
+CREATE TABLE IF NOT EXISTS collector_modbus_point (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    pointId BIGINT NOT NULL COMMENT '点位ID(point_config.id)',
+    sourceId BIGINT NOT NULL COMMENT '采集源ID',
+    registerType VARCHAR(20) NOT NULL COMMENT 'COIL/DISCRETE_INPUT/HOLDING_REGISTER/INPUT_REGISTER',
+    address INT NOT NULL COMMENT '起始寄存器地址(0基)',
+    quantity INT NOT NULL DEFAULT 1 COMMENT '读取数量',
+    dataType VARCHAR(20) NOT NULL DEFAULT 'INT16' COMMENT 'BOOLEAN/INT16/UINT16/INT32/UINT32/FLOAT32',
+    byteOrder VARCHAR(10) NOT NULL DEFAULT 'ABCD' COMMENT 'ABCD/CDAB/BADC/DCBA',
+    scale DECIMAL(18,6) NOT NULL DEFAULT 1 COMMENT '换算系数：采集值 * scale',
+    UNIQUE KEY uk_pointId (pointId),
+    KEY idx_sourceId (sourceId)
+) COMMENT 'Modbus点位绑定';
+
+-- OPC UA 点位绑定
+CREATE TABLE IF NOT EXISTS collector_opcua_point (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    pointId BIGINT NOT NULL COMMENT '点位ID(point_config.id)',
+    sourceId BIGINT NOT NULL COMMENT '采集源ID',
+    nodeId VARCHAR(255) NOT NULL COMMENT 'NodeId，如 ns=2;s=Machine.Temp',
+    attributeName VARCHAR(50) NULL COMMENT '写入 data_detail.attributeName',
+    UNIQUE KEY uk_pointId (pointId),
+    KEY idx_sourceId (sourceId)
+) COMMENT 'OPC UA点位绑定';
+
+-- 点位表关联采集源（已存在的表执行一次）
+ALTER TABLE point_config
+    ADD COLUMN sourceId BIGINT NULL COMMENT '采集数据源ID',
+    ADD KEY idx_sourceId (sourceId),
+    MODIFY COLUMN validUrl VARCHAR(200) NULL COMMENT '已废弃：原数据有效性检查接口',
+    MODIFY COLUMN dataUrl VARCHAR(200) NULL COMMENT '已废弃：原数据采集接口';
+
+-- 点位计量单位（已存在的表执行一次）
+ALTER TABLE point_config ADD COLUMN unit VARCHAR(20) NULL COMMENT '计量单位';
+
+-- 存量迁移：按原 dataUrl 去重生成 HTTP 采集源
+INSERT INTO collector_source (sourceCode, sourceName, protocol, status, remark)
+SELECT CONCAT('LEGACY_HTTP_', LEFT(MD5(t.dataUrl), 8)),
+       CONCAT('历史HTTP源-', LEFT(MD5(t.dataUrl), 8)),
+       'HTTP',
+       1,
+       '由原 point_config.dataUrl 迁移'
+FROM (SELECT DISTINCT dataUrl FROM point_config WHERE dataUrl IS NOT NULL AND dataUrl <> '') t;
+
+INSERT INTO collector_http_config (sourceId, baseUrl, validUrl, method, contentType, requestTemplate,
+                                   responseDataPath, valueField, attributeNameField, timeoutMillis)
+SELECT s.id,
+       MIN(p.dataUrl),
+       MAX(p.validUrl),
+       'POST',
+       'application/json',
+       '{"pointCode":"${pointCode}","collectTime":"${collectTime}"}',
+       'data',
+       'value',
+       'attributeName',
+       5000
+FROM point_config p
+JOIN collector_source s ON s.sourceCode = CONCAT('LEGACY_HTTP_', LEFT(MD5(p.dataUrl), 8))
+WHERE p.dataUrl IS NOT NULL AND p.dataUrl <> ''
+GROUP BY s.id;
+
+UPDATE point_config p
+JOIN collector_source s ON s.sourceCode = CONCAT('LEGACY_HTTP_', LEFT(MD5(p.dataUrl), 8))
+SET p.sourceId = s.id
+WHERE p.sourceId IS NULL;
+
+-- 迁移校验：应返回 0
+-- SELECT COUNT(*) FROM point_config WHERE sourceId IS NULL;
 
 CREATE TABLE `code_dictionary` (
                                    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',

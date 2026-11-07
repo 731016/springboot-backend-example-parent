@@ -25,6 +25,18 @@ public class DataStatistics {
     private BigDecimal maximumValue;  // 改为 maximumValue
     private BigDecimal minimumValue;  // 改为 minimumValue
     private BigDecimal averageValue;  // 改为 averageValue
+    /**
+     * 样本标准差
+     */
+    private BigDecimal standardDeviation;
+    /**
+     * 参与统计的样本数
+     */
+    private Integer sampleCount;
+    /**
+     * 超限次数
+     */
+    private Integer outOfLimitCount;
 
     private Integer status;
 

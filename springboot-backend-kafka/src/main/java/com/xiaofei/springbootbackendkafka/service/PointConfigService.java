@@ -1,14 +1,12 @@
 package com.xiaofei.springbootbackendkafka.service;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpUtil;
-import cn.hutool.http.Method;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xiaofei.springbootbackendcommon.common.ErrorCode;
 import com.xiaofei.springbootbackendcommon.constant.CommonConstant;
 import com.xiaofei.springbootbackendcommon.exception.BusinessException;
+import com.xiaofei.springbootbackendkafka.collector.CollectorSourceSnapshot;
 import com.xiaofei.springbootbackendkafka.mapper.PointConfigMapper;
 import com.xiaofei.springbootbackendkafka.model.dto.AddPointConfigRequest;
 import com.xiaofei.springbootbackendkafka.model.dto.PointConfigQueryRequest;
@@ -39,6 +37,15 @@ public class PointConfigService {
     @Autowired
     private PointConfigMapper pointConfigMapper;
 
+    @Autowired
+    private CollectorSourceService collectorSourceService;
+
+    @Autowired
+    private CollectorPointBindingService collectorPointBindingService;
+
+    @Autowired
+    private DataCollectionService dataCollectionService;
+
     @Transactional(rollbackFor = Exception.class)
     public long addPointConfig(AddPointConfigRequest request) {
         // 1. 校验点位编码是否已存在
@@ -55,12 +62,15 @@ public class PointConfigService {
             }
         }
 
-        // 3. 创建点位配置
+        // 3. 校验采集数据源
+        CollectorSourceSnapshot source = validateSource(request.getSourceId());
+
+        // 4. 创建点位配置
         PointConfig pointConfig = new PointConfig();
         pointConfig.setPointCode(request.getPointCode());
         pointConfig.setPointName(request.getPointName());
-        pointConfig.setValidUrl(request.getValidUrl());
-        pointConfig.setDataUrl(request.getDataUrl());
+        pointConfig.setUnit(request.getUnit());
+        pointConfig.setSourceId(request.getSourceId());
         pointConfig.setMinLimit(request.getMinLimit());
         pointConfig.setMaxLimit(request.getMaxLimit());
         pointConfig.setSpcGroupSize(request.getSpcGroupSize() == null ? 5 : request.getSpcGroupSize());
@@ -78,19 +88,9 @@ public class PointConfigService {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "新增点位配置失败");
         }
 
-        // 5. 如果URL不为空，验证连接
-        if (StrUtil.isNotBlank(request.getValidUrl())) {
-            try {
-                boolean isValid = testConnection(request.getDataUrl());
-                if (!isValid) {
-                    log.warn("点位验证URL连接失败: {}", request.getValidUrl());
-                    throw new BusinessException(ErrorCode.OPERATION_ERROR, String.format("点位验证URL连接失败: {%s}", request.getDataUrl()));
-                }
-            } catch (Exception e) {
-                log.error("验证URL连接异常: {}", request.getValidUrl(), e);
-                throw new BusinessException(ErrorCode.OPERATION_ERROR, String.format("验证URL连接异常: {%s}", request.getDataUrl()));
-            }
-        }
+        // 5. 保存协议绑定
+        collectorPointBindingService.saveBinding(pointConfig.getId(), request.getSourceId(),
+                source.protocol(), request.getBinding());
 
         return pointConfig.getId();
     }
@@ -123,11 +123,16 @@ public class PointConfigService {
             }
         }
 
+        // 校验采集数据源
+        CollectorSourceSnapshot source = validateSource(request.getSourceId());
+
+        String originalPointCode = existPoint.getPointCode();
+
         // 更新字段
         existPoint.setPointCode(request.getPointCode());
         existPoint.setPointName(request.getPointName());
-        existPoint.setValidUrl(request.getValidUrl());
-        existPoint.setDataUrl(request.getDataUrl());
+        existPoint.setUnit(request.getUnit());
+        existPoint.setSourceId(request.getSourceId());
         existPoint.setMinLimit(request.getMinLimit());
         existPoint.setMaxLimit(request.getMaxLimit());
         existPoint.setSpcGroupSize(request.getSpcGroupSize() == null ? 5 : request.getSpcGroupSize());
@@ -142,36 +147,29 @@ public class PointConfigService {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "更新点位配置失败");
         }
 
-        // 如有需要，可在此重新校验 URL 连接
-        if (StrUtil.isNotBlank(request.getValidUrl())) {
-            try {
-                boolean isValid = testConnection(request.getDataUrl());
-                if (!isValid) {
-                    log.warn("点位验证URL连接失败: {}", request.getValidUrl());
-                    throw new BusinessException(ErrorCode.OPERATION_ERROR, String.format("点位验证URL连接失败: {%s}", request.getDataUrl()));
-                }
-            } catch (Exception e) {
-                log.error("验证URL连接异常: {}", request.getValidUrl(), e);
-                throw new BusinessException(ErrorCode.OPERATION_ERROR, String.format("验证URL连接异常: {%s}", request.getDataUrl()));
-            }
+        // 保存协议绑定
+        collectorPointBindingService.saveBinding(existPoint.getId(), request.getSourceId(),
+                source.protocol(), request.getBinding());
+
+        // 点位编码变更时停止旧任务，再按新配置重启
+        if (!originalPointCode.equals(request.getPointCode())) {
+            dataCollectionService.stopCollection(originalPointCode);
         }
+        dataCollectionService.reloadPoint(request.getPointCode());
     }
 
     /**
-     * 测试连接
+     * 校验采集数据源存在且已启用
      */
-    private boolean testConnection(String url) {
-        try {
-            HttpResponse response = HttpUtil.createRequest(Method.POST, url)
-                    .header("Content-Type", "application/json")
-                    .setConnectionTimeout(5000)
-                    .setReadTimeout(5000)
-                    .execute();
-            return response.isOk();
-        } catch (Exception e) {
-            log.error("连接测试失败: {}", url, e);
-            return false;
+    private CollectorSourceSnapshot validateSource(Long sourceId) {
+        if (sourceId == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "采集数据源不能为空");
         }
+        CollectorSourceSnapshot source = collectorSourceService.getSnapshot(sourceId);
+        if (!Integer.valueOf(1).equals(source.getSource().getStatus())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "采集数据源已禁用");
+        }
+        return source;
     }
 
     /**

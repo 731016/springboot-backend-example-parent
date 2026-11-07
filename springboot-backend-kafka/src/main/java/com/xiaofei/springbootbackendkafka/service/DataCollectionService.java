@@ -3,8 +3,14 @@ package com.xiaofei.springbootbackendkafka.service;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xiaofei.springbootbackendcommon.common.ErrorCode;
 import com.xiaofei.springbootbackendcommon.exception.BusinessException;
+import com.xiaofei.springbootbackendkafka.collector.CollectorAdapter;
+import com.xiaofei.springbootbackendkafka.collector.CollectorAdapterRegistry;
+import com.xiaofei.springbootbackendkafka.collector.CollectorProtocol;
+import com.xiaofei.springbootbackendkafka.collector.CollectorSourceSnapshot;
+import com.xiaofei.springbootbackendkafka.collector.PointBinding;
 import com.xiaofei.springbootbackendkafka.constants.KafkaConstants;
 import com.xiaofei.springbootbackendkafka.mapper.DataDetailMapper;
 import com.xiaofei.springbootbackendkafka.mapper.DataStatisticsMapper;
@@ -49,6 +55,15 @@ public class DataCollectionService {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
+    @Autowired
+    private CollectorSourceService collectorSourceService;
+
+    @Autowired
+    private CollectorPointBindingService collectorPointBindingService;
+
+    @Autowired
+    private CollectorAdapterRegistry collectorAdapterRegistry;
+
 
     private final Map<String, CollDataTask> taskInstances = new ConcurrentHashMap<>();
 
@@ -58,45 +73,29 @@ public class DataCollectionService {
 
     public void startAllCollectTasks() {
         List<PointConfig> allEnabledPoints = pointConfigMapper.getAllEnabledPoints();
-        if (CollectionUtil.isNotEmpty(allEnabledPoints)) {
-            for (PointConfig pointConfig : allEnabledPoints) {
-                String pointCode = pointConfig.getPointCode();
-                // 检查任务是否已启动
-                if (collectionTasks.containsKey(pointCode)) {
-                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "采集任务已在运行中");
-                }
-                // 创建并启动采集任务
-                ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(
-                        () -> {
-                            try {
-                                collectData(pointConfig);
-                            } catch (Exception e) {
-                                log.error("采集线程异常: {}", pointConfig.getPointCode(), e);
-                                try {
-                                    // 发生异常时等待指定时间
-                                    Thread.sleep(TimeUnit.SECONDS.toMillis(pointConfig.getIntervalSeconds()));
-                                    log.warn("{}秒后重试采集: {}",
-                                            pointConfig.getIntervalSeconds(),
-                                            pointConfig.getPointCode());
-                                } catch (InterruptedException ie) {
-                                    Thread.currentThread().interrupt();
-                                    log.error("等待被中断: {}", pointConfig.getPointCode(), ie);
-                                }
-                            }
-                        },
-                        0,
-                        pointConfig.getIntervalSeconds(),
-                        TimeUnit.SECONDS
-                );
-
-                // 保存任务引用
-                collectionTasks.put(pointCode, future);
-
-                // 更新运行状态
-                pointConfigMapper.updateRunningStatus(pointCode, 1);
-
-                log.info("采集任务已启动: {}", pointCode);
+        if (CollectionUtil.isEmpty(allEnabledPoints)) {
+            return;
+        }
+        for (PointConfig pointConfig : allEnabledPoints) {
+            String pointCode = pointConfig.getPointCode();
+            // 检查任务是否已启动
+            if (collectionTasks.containsKey(pointCode)) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "采集任务已在运行中");
             }
+            CollDataTask task;
+            try {
+                task = createTask(pointConfig);
+            } catch (Exception e) {
+                log.error("创建采集任务失败，跳过点位: {}", pointCode, e);
+                continue;
+            }
+            taskInstances.put(pointCode, task);
+            schedule(pointCode, pointConfig.getIntervalSeconds());
+
+            // 更新运行状态
+            pointConfigMapper.updateRunningStatus(pointCode, 1);
+
+            log.info("采集任务已启动: {}", pointCode);
         }
     }
 
@@ -115,32 +114,9 @@ public class DataCollectionService {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "采集任务已在运行中");
         }
 
-        // 创建并启动采集任务
-        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(
-                () -> {
-                    try {
-                        collectData(config);
-                    } catch (Exception e) {
-                        log.error("采集线程异常: {}", config.getPointCode(), e);
-                        try {
-                            // 发生异常时等待指定时间
-                            Thread.sleep(TimeUnit.SECONDS.toMillis(config.getIntervalSeconds()));
-                            log.warn("{}秒后重试采集: {}",
-                                    config.getIntervalSeconds(),
-                                    config.getPointCode());
-                        } catch (InterruptedException ie) {
-                            Thread.currentThread().interrupt();
-                            log.error("等待被中断: {}", config.getPointCode(), ie);
-                        }
-                    }
-                },
-                0,
-                config.getIntervalSeconds(),
-                TimeUnit.SECONDS
-        );
-
-        // 保存任务引用
-        collectionTasks.put(pointCode, future);
+        CollDataTask task = createTask(config);
+        taskInstances.put(pointCode, task);
+        schedule(pointCode, config.getIntervalSeconds());
 
         //点位启用
         pointConfigMapper.updatePointsStatus(Arrays.asList(pointCode), 1);
@@ -152,6 +128,77 @@ public class DataCollectionService {
     }
 
     /**
+     * 点位配置变更后重启采集任务（未运行时忽略）
+     */
+    public void reloadPoint(String pointCode) {
+        if (!collectionTasks.containsKey(pointCode)) {
+            taskInstances.remove(pointCode);
+            return;
+        }
+        stopCollection(pointCode);
+        startCollection(pointCode);
+    }
+
+    /**
+     * 数据源变更后重启引用该数据源的点位任务
+     */
+    public void restartBySource(Long sourceId) {
+        if (sourceId == null) {
+            return;
+        }
+        List<PointConfig> points = pointConfigMapper.selectList(
+                new QueryWrapper<PointConfig>().eq("sourceId", sourceId));
+        for (PointConfig point : points) {
+            try {
+                reloadPoint(point.getPointCode());
+            } catch (Exception e) {
+                log.error("重启采集任务失败: {}", point.getPointCode(), e);
+            }
+        }
+    }
+
+    private void schedule(String pointCode, Integer intervalSeconds) {
+        int interval = intervalSeconds == null || intervalSeconds < 1 ? 1 : intervalSeconds;
+        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(
+                () -> {
+                    try {
+                        collectData(pointCode);
+                    } catch (Exception e) {
+                        log.error("采集线程异常: {}", pointCode, e);
+                        try {
+                            // 发生异常时等待指定时间
+                            Thread.sleep(TimeUnit.SECONDS.toMillis(interval));
+                            log.warn("{}秒后重试采集: {}", interval, pointCode);
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                            log.error("等待被中断: {}", pointCode, ie);
+                        }
+                    }
+                },
+                0,
+                interval,
+                TimeUnit.SECONDS
+        );
+        collectionTasks.put(pointCode, future);
+    }
+
+    private CollDataTask createTask(PointConfig config) {
+        if (config.getSourceId() == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,
+                    "点位未关联采集数据源: " + config.getPointCode());
+        }
+        CollectorSourceSnapshot source = collectorSourceService.getSnapshot(config.getSourceId());
+        if (!Integer.valueOf(1).equals(source.getSource().getStatus())) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,
+                    "采集数据源已禁用: " + source.getSource().getSourceName());
+        }
+        CollectorProtocol protocol = source.protocol();
+        PointBinding binding = collectorPointBindingService.getBinding(config, protocol);
+        CollectorAdapter adapter = collectorAdapterRegistry.get(protocol);
+        return new CollDataTask(config, source, binding, adapter);
+    }
+
+    /**
      * 停止采集任务
      */
     public void stopCollection(String pointCode) {
@@ -159,6 +206,7 @@ public class DataCollectionService {
         if (future != null) {
             future.cancel(false);
         }
+        taskInstances.remove(pointCode);
         // 更新运行状态
         pointConfigMapper.updateRunningStatus(pointCode, 0);
         log.info("采集任务已停止: {}", pointCode);
@@ -202,18 +250,17 @@ public class DataCollectionService {
                 .collect(Collectors.toList());
     }
 
-    private void collectData(PointConfig config) throws Exception {
-        // 获取或创建任务实例
-        CollDataTask collDataTask = taskInstances.computeIfAbsent(
-                config.getPointCode(),
-                k -> new CollDataTask(config)
-        );
+    private void collectData(String pointCode) throws Exception {
+        CollDataTask collDataTask = taskInstances.get(pointCode);
+        if (collDataTask == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "采集任务未初始化: " + pointCode);
+        }
 
         try {
             String result = collDataTask.call();
             if (StringUtils.isNotEmpty(result)) {
                 // 将结果转换为 JSON 字符串
-                kafkaTemplate.send(KafkaConstants.RAW_DATA_TOPIC, config.getPointCode(), JSONUtil.toJsonStr(result));
+                kafkaTemplate.send(KafkaConstants.RAW_DATA_TOPIC, pointCode, JSONUtil.toJsonStr(result));
                 // 成功后重置重试次数
                 collDataTask.resetRetryCount();
             }
@@ -230,17 +277,27 @@ public class DataCollectionService {
         return lastCollectTime;
     }
 
+    /** 明细查询默认返回的最近数据条数 */
+    private static final int DEFAULT_DETAIL_LIMIT = 2000;
+
+    /** 明细查询单次最大返回条数，避免一次性拉取全量数据 */
+    private static final int MAX_DETAIL_LIMIT = 5000;
+
     /**
      * 根据点位编码查询采集数据
      *
      * @param pointCode 点位编码
+     * @param limit     最多返回条数，为空时使用默认值
      * @return 采集数据列表
      */
-    public List<DataDetail> getDataDetailsByPointCode(String pointCode) {
+    public List<DataDetail> getDataDetailsByPointCode(String pointCode, Integer limit) {
         if (StringUtils.isBlank(pointCode)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "点位编码不能为空");
         }
-        return dataDetailMapper.getDetailsByPointCode(pointCode);
+        int size = (limit == null || limit <= 0)
+                ? DEFAULT_DETAIL_LIMIT
+                : Math.min(limit, MAX_DETAIL_LIMIT);
+        return dataDetailMapper.getDetailsByPointCode(pointCode, size);
     }
 
     /**
@@ -264,6 +321,7 @@ public class DataCollectionService {
             pointConfigMapper.updateRunningStatus(pointCode, 0);
         });
         collectionTasks.clear();
+        taskInstances.clear();
 
         // 关闭调度器
         scheduler.shutdown();

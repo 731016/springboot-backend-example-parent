@@ -1,19 +1,15 @@
 package com.xiaofei.springbootbackendkafka.task;
 
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpUtil;
-import cn.hutool.http.Method;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.xiaofei.springbootbackendkafka.model.dto.QueryCollectTask;
-import com.xiaofei.springbootbackendkafka.model.entity.DataDetail;
-import com.xiaofei.springbootbackendkafka.model.entity.DataStatistics;
+import com.xiaofei.springbootbackendkafka.collector.CollectResult;
+import com.xiaofei.springbootbackendkafka.collector.CollectorAdapter;
+import com.xiaofei.springbootbackendkafka.collector.CollectorSourceSnapshot;
+import com.xiaofei.springbootbackendkafka.collector.PointBinding;
+import com.xiaofei.springbootbackendkafka.model.dto.CollectedData;
 import com.xiaofei.springbootbackendkafka.model.entity.PointConfig;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
@@ -25,69 +21,44 @@ import java.util.concurrent.Callable;
 public class CollDataTask extends CollectAbstractTask implements Callable<String> {
 
     /**
-     * 当前采集数据-主表
+     * 采集源快照
      */
-    private DataStatistics dataStatistics;
+    private final CollectorSourceSnapshot source;
 
     /**
-     * 当前采集数据
+     * 点位协议绑定
      */
-    private List<DataDetail> collectedDataList;
+    private final PointBinding binding;
 
     /**
-     * 当前采集查询对象
+     * 协议适配器
      */
-    private QueryCollectTask collectedData;
+    private final CollectorAdapter adapter;
 
-    public CollDataTask(PointConfig config) {
-        this.config = config;
-        initCollect();
-    }
-
-    private void initCollect() {
-        collectedData = new QueryCollectTask();
-        collectedData.setPointCode(config.getPointCode());
-        collectedData.setCollectTime(new Date());
-    }
-
-    /**
-     * 获取当前查询参数
-     *
-     * @return
-     */
-    public QueryCollectTask getCollectedData() {
-        return collectedData;
+    public CollDataTask(PointConfig config, CollectorSourceSnapshot source,
+                        PointBinding binding, CollectorAdapter adapter) {
+        super(config, 0);
+        this.source = source;
+        this.binding = binding;
+        this.adapter = adapter;
     }
 
     @Override
-    public String call() throws Exception {
+    public String call() {
         try {
-            // 发送HTTP请求
-            HttpResponse response = HttpUtil.createRequest(Method.POST, config.getDataUrl())
-                    .header("Content-Type", "application/json")
-                    .setConnectionTimeout(5000)
-                    .setReadTimeout(5000)
-                    .body(JSONUtil.toJsonStr(collectedData))
-                    .execute();
-            // 检查响应状态
-            if (response.isOk()) {
-                String body = response.body();
-                log.info("数据采集成功: pointCode={}, value={}, response={}",
-                        config.getPointCode(),
-                        body,
-                        response.body());
-                //下次采集时间
-                collectedData.setCollectTime(DateUtil.offsetSecond(collectedData.getCollectTime(), config.getIntervalSeconds()));
-                JSONObject jsonObject = JSONUtil.parseObj(body);
-                JSONObject data = jsonObject.getJSONObject("data");
-                // 返回
-                return JSONUtil.toJsonStr(data);
-            } else {
-                log.error("数据采集失败: pointCode={}, statusCode={}, response={}",
-                        config.getPointCode(),
-                        response.getStatus(),
-                        response.body());
+            Date collectTime = new Date();
+            CollectResult result = adapter.collect(source, binding, collectTime);
+            if (result == null || result.getValue() == null) {
+                log.warn("采集结果为空: pointCode={}", config.getPointCode());
+                return null;
             }
+            CollectedData data = new CollectedData();
+            data.setPointCode(config.getPointCode());
+            data.setCollectTime(collectTime);
+            data.setValue(result.getValue());
+            data.setAttributeName(result.getAttributeName());
+            log.info("数据采集成功: pointCode={}, value={}", config.getPointCode(), result.getValue());
+            return JSONUtil.toJsonStr(data);
         } catch (Exception e) {
             log.error("数据采集失败: {}", config.getPointCode(), e);
         }

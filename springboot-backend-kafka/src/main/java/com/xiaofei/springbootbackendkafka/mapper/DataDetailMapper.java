@@ -32,7 +32,7 @@ public interface DataDetailMapper extends BaseMapper<DataDetail> {
     /**
      * 获取统计ID下的所有明细数据
      */
-    @Select("SELECT * FROM data_detail WHERE statisticsId = #{statisticsId}")
+    @Select("SELECT * FROM data_detail WHERE statisticsId = #{statisticsId} AND isDeleted = 0")
     List<DataDetail> getDetailsByStatisticsId(@Param("statisticsId") Long statisticsId);
 
     /**
@@ -40,6 +40,7 @@ public interface DataDetailMapper extends BaseMapper<DataDetail> {
      */
     @Select("SELECT * FROM data_detail " +
             "WHERE pointCode = #{pointCode} " +
+            "AND isDeleted = 0 " +
             "AND collectTime >= #{startTime} " +
             "AND collectTime <= #{endTime} " +
             "ORDER BY collectTime DESC")
@@ -55,7 +56,7 @@ public interface DataDetailMapper extends BaseMapper<DataDetail> {
             "MIN(value) as minValue, " +
             "AVG(value) as avgValue " +
             "FROM data_detail " +
-            "WHERE statisticsId = #{statisticsId}")
+            "WHERE statisticsId = #{statisticsId} AND isDeleted = 0")
     Map<String, BigDecimal> calculateStatistics(@Param("statisticsId") Long statisticsId);
 
     /**
@@ -66,8 +67,11 @@ public interface DataDetailMapper extends BaseMapper<DataDetail> {
     int deleteExpiredData(@Param("expireTime") Date expireTime);
 
     /**
-     * 根据点位编码查询采集数据，按采集时间降序排列
+     * 根据点位编码查询采集数据，按采集时间降序排列，最多返回 limit 条
      */
-    @Select("SELECT * FROM data_detail WHERE pointCode = #{pointCode} ORDER BY collectTime DESC")
-    List<DataDetail> getDetailsByPointCode(@Param("pointCode") String pointCode);
+    @Select("SELECT * FROM data_detail " +
+            "WHERE pointCode = #{pointCode} AND isDeleted = 0 " +
+            "ORDER BY collectTime DESC LIMIT #{limit}")
+    List<DataDetail> getDetailsByPointCode(@Param("pointCode") String pointCode,
+                                           @Param("limit") Integer limit);
 }

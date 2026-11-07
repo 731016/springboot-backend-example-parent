@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 /**
@@ -27,10 +28,18 @@ public class AddPointConfigRequest {
     @NotBlank(message = "点位名称不能为空")
     private String pointName;
 
-    private String validUrl;
+    /**
+     * 计量单位，如 ℃、mm、%
+     */
+    private String unit;
 
-    @NotBlank(message = "数据URL不能为空")
-    private String dataUrl;
+    @NotNull(message = "采集数据源不能为空")
+    private Long sourceId;
+
+    /**
+     * 协议绑定：Modbus / OPC UA 点位必填
+     */
+    private PointBindingDTO binding;
 
     private BigDecimal minLimit;
 
