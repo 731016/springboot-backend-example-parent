@@ -3,7 +3,7 @@ package com.xiaofei.springbootbackendkafka.model.dto;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 
 /**
  * 工作日历分页查询请求
@@ -26,17 +26,17 @@ public class WorkCalendarQueryRequest implements Serializable {
     /**
      * 工作日期（查询某一天，可选）
      */
-    private Date workDate;
+    private LocalDate workDate;
 
     /**
      * 工作日期范围-开始（与 workDate 二选一，用于日历按月拉取）
      */
-    private Date workDateStart;
+    private LocalDate workDateStart;
 
     /**
      * 工作日期范围-结束（与 workDate 二选一，用于日历按月拉取）
      */
-    private Date workDateEnd;
+    private LocalDate workDateEnd;
 
     /**
      * 班次编码

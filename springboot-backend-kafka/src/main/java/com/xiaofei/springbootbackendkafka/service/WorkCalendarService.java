@@ -15,7 +15,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Calendar;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Service
@@ -85,47 +85,21 @@ public class WorkCalendarService {
     public QueryWrapper<WorkCalendar> getQueryWrapper(WorkCalendarQueryRequest queryRequest) {
         QueryWrapper<WorkCalendar> queryWrapper = new QueryWrapper<>();
 
-        Date workDate = queryRequest.getWorkDate();
-        Date workDateStart = queryRequest.getWorkDateStart();
-        Date workDateEnd = queryRequest.getWorkDateEnd();
+        LocalDate workDate = queryRequest.getWorkDate();
+        LocalDate workDateStart = queryRequest.getWorkDateStart();
+        LocalDate workDateEnd = queryRequest.getWorkDateEnd();
         String shiftCode = queryRequest.getShiftCode();
         String shiftName = queryRequest.getShiftName();
         Integer status = queryRequest.getStatus();
         String sortField = queryRequest.getSortField();
         String sortOrder = queryRequest.getSortOrder();
 
-        // 工作日期只按「年月日」过滤，不比较时分秒
+        // workDate 是 DATE 类型，直接按日期比较，避免 Date 与数据库时区换算造成跨天偏移
         if (workDate != null) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(workDate);
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            Date dayStart = cal.getTime();
-            cal.add(Calendar.DAY_OF_MONTH, 1);
-            Date nextDayStart = cal.getTime();
-            queryWrapper.ge("workDate", dayStart);
-            queryWrapper.lt("workDate", nextDayStart);
+            queryWrapper.eq("workDate", workDate);
         } else if (workDateStart != null || workDateEnd != null) {
-            if (workDateStart != null) {
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(workDateStart);
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                queryWrapper.ge("workDate", cal.getTime());
-            }
-            if (workDateEnd != null) {
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(workDateEnd);
-                cal.set(Calendar.HOUR_OF_DAY, 23);
-                cal.set(Calendar.MINUTE, 59);
-                cal.set(Calendar.SECOND, 59);
-                cal.set(Calendar.MILLISECOND, 999);
-                queryWrapper.le("workDate", cal.getTime());
-            }
+            queryWrapper.ge(workDateStart != null, "workDate", workDateStart);
+            queryWrapper.le(workDateEnd != null, "workDate", workDateEnd);
         }
         queryWrapper.like(StringUtils.isNotBlank(shiftCode), "shiftCode", shiftCode);
         queryWrapper.like(StringUtils.isNotBlank(shiftName), "shiftName", shiftName);

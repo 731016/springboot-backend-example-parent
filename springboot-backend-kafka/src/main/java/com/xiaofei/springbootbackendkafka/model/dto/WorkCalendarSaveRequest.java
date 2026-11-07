@@ -6,6 +6,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -22,7 +23,7 @@ public class WorkCalendarSaveRequest implements Serializable {
     private Long id;
 
     @NotNull(message = "工作日期不能为空")
-    private Date workDate;
+    private LocalDate workDate;
 
     @NotNull(message = "班次编码不能为空")
     private String shiftCode;

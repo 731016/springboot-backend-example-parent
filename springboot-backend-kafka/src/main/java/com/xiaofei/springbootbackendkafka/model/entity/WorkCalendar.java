@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -18,9 +19,10 @@ public class WorkCalendar {
     private Long id;
 
     /**
-     * 工作日期（只关心日期部分）
+     * 工作日期（只关心日期部分，使用 LocalDate 避免时区换算产生跨天偏移）
      */
-    private Date workDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate workDate;
 
     /**
      * 班次编码（如 A/B/C）
